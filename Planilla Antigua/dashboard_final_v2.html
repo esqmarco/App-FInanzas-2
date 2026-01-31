@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Financiero - NeuroTEA + Familia</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f9fafb;
+            color: #1f2937;
+            min-height: 100vh;
+            padding: 24px;
+        }
+        
+        /* Header */
+        .header {
+            background: #1f2937;
+            color: white;
+            padding: 24px 32px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(31,41,55,0.2);
+        }
+        h1 {
+            font-size: 1.75em;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .subtitle {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9em;
+            font-weight: 400;
+        }
+        
+        .section-title {
+            background: #1f2937;
+            color: white;
+            padding: 12px 20px;
+            margin: 32px 0 16px 0;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            border: 2px solid #e5e7eb;
+            transition: all 0.2s ease;
+        }
+        .card:hover {
+            border-color: #d1d5db;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .card h3 {
+            color: #1f2937;
+            margin-bottom: 4px;
+            font-size: 1em;
+            font-weight: 600;
+        }
+        .card .description {
+            color: #6b7280;
+            font-size: 0.8em;
+            margin-bottom: 16px;
+            font-weight: 400;
+        }
+        .chart-container {
+            position: relative;
+            height: 260px;
+        }
+        
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .kpi-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid #e5e7eb;
+            transition: all 0.2s ease;
+        }
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .kpi-card.success {
+            border-left: 4px solid #047857;
+        }
+        .kpi-card.danger {
+            border-left: 4px solid #dc2626;
+        }
+        .kpi-card.warning {
+            border-left: 4px solid #b45309;
+        }
+        .kpi-card.info {
+            border-left: 4px solid #1f2937;
+        }
+        .kpi-value {
+            font-size: 1.6em;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        .kpi-card.success .kpi-value { color: #047857; }
+        .kpi-card.danger .kpi-value { color: #dc2626; }
+        .kpi-card.warning .kpi-value { color: #b45309; }
+        .kpi-label {
+            font-size: 0.75em;
+            color: #6b7280;
+            margin-top: 4px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .kpi-trend {
+            font-size: 0.8em;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+        .kpi-trend.up { color: #047857; }
+        .kpi-trend.down { color: #dc2626; }
+        .kpi-trend.neutral { color: #6b7280; }
+        
+        /* Flow diagram - VERTICAL */
+        .flow-diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            gap: 0;
+        }
+        .flow-box {
+            background: white;
+            border: 2px solid #1f2937;
+            border-radius: 12px;
+            padding: 16px 40px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            min-width: 180px;
+        }
+        .flow-box.nt {
+            border-color: #0369a1;
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+        }
+        .flow-box.familia {
+            border-color: #1f2937;
+            background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+        }
+        .flow-box .icon {
+            font-size: 2em;
+            margin-bottom: 6px;
+        }
+        .flow-box .title {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 1.1em;
+        }
+        .flow-box .amount {
+            color: #047857;
+            font-weight: 500;
+            font-size: 0.85em;
+            margin-top: 4px;
+        }
+        .flow-box.nt .amount {
+            color: #0369a1;
+        }
+        .flow-arrow {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 8px 0;
+        }
+        .flow-arrow .arrow-line {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .flow-arrow .arrow-line svg {
+            width: 24px;
+            height: 50px;
+        }
+        .flow-arrow .transfer-info {
+            text-align: left;
+        }
+        .flow-arrow .transfer-amount {
+            font-weight: 700;
+            font-size: 1.3em;
+            color: #1f2937;
+        }
+        .flow-arrow .transfer-label {
+            font-size: 0.8em;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+        
+        .note {
+            background: #fef3c7;
+            border-left: 4px solid #b45309;
+            padding: 16px 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+            color: #92400e;
+            font-size: 0.9em;
+        }
+        
+        /* Responsive */
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Dashboard de Control Financiero</h1>
+        <p class="subtitle">NeuroTEA + Familia • Enero 2026</p>
+    </div>
+    
+    <div class="note">
+        💡 <strong>Vista previa:</strong> Datos simulados basados en tu estructura real. Toca los gráficos para ver valores.
+    </div>
+
+    <!-- SECCIÓN 1: TARJETAS KPI -->
+    <div class="section-title">📋 INDICADORES CLAVE</div>
+    
+    <div class="kpi-grid">
+        <div class="kpi-card success">
+            <div class="kpi-value">₲ 16.7M</div>
+            <div class="kpi-label">Saldo Familia</div>
+            <div class="kpi-trend up">↑ 5% vs mes anterior</div>
+        </div>
+        <div class="kpi-card info">
+            <div class="kpi-value">₲ 1.8M</div>
+            <div class="kpi-label">Saldo NeuroTEA</div>
+            <div class="kpi-trend down">↓ 12% vs mes anterior</div>
+        </div>
+        <div class="kpi-card info">
+            <div class="kpi-value">₲ 18.5M</div>
+            <div class="kpi-label">Total Disponible</div>
+            <div class="kpi-trend neutral">Liquidez combinada</div>
+        </div>
+        <div class="kpi-card danger">
+            <div class="kpi-value">72%</div>
+            <div class="kpi-label">Gastos / Ingresos</div>
+            <div class="kpi-trend down">↑ 8pp vs meta 65%</div>
+        </div>
+        <div class="kpi-card success">
+            <div class="kpi-value">₲ 5.2M</div>
+            <div class="kpi-label">Balance Mensual</div>
+            <div class="kpi-trend up">Ingresos - Egresos</div>
+        </div>
+        <div class="kpi-card danger">
+            <div class="kpi-value">38%</div>
+            <div class="kpi-label">Préstamos / Ingresos</div>
+            <div class="kpi-trend neutral">⚠️ Por encima de meta</div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 2: LIQUIDEZ -->
+    <div class="section-title">💧 LIQUIDEZ SEMANAL</div>
+    <div class="grid">
+        <div class="card">
+            <h3>Liquidez Semanal - Familia</h3>
+            <p class="description">Pagos realizados vs pendientes por semana</p>
+            <div class="chart-container">
+                <canvas id="liquidezFamilia"></canvas>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Liquidez Semanal - NeuroTEA</h3>
+            <p class="description">Cobertura de gastos fijos por semana</p>
+            <div class="chart-container">
+                <canvas id="liquidezNT"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 3: BALANCE -->
+    <div class="section-title">⚖️ BALANCE MENSUAL</div>
+    <div class="grid">
+        <div class="card">
+            <h3>Ingresos vs Egresos (con línea de Balance)</h3>
+            <p class="description">Comparativa mes a mes • Toque la curva para ver valores</p>
+            <div class="chart-container">
+                <canvas id="balanceMensual"></canvas>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Ahorro Acumulado Anual</h3>
+            <p class="description">Evolución del patrimonio a lo largo del año</p>
+            <div class="chart-container">
+                <canvas id="balanceAcumulado"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 4: CLASIFICACIÓN DE GASTOS -->
+    <div class="section-title">🥧 DISTRIBUCIÓN DE GASTOS</div>
+    <div class="grid">
+        <div class="card">
+            <h3>Gastos por Categoría</h3>
+            <p class="description">Porcentaje sobre el gasto total</p>
+            <div class="chart-container">
+                <canvas id="gastosCategoria"></canvas>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Composición: Fijos vs Variables vs Préstamos</h3>
+            <p class="description">Estructura de egresos mensuales</p>
+            <div class="chart-container">
+                <canvas id="gastosTipo"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 5: % GASTOS VS INGRESOS -->
+    <div class="section-title">📊 GASTOS COMO % DE INGRESOS</div>
+    <div class="grid">
+        <div class="card">
+            <h3>Cada Categoría vs Ingresos Totales</h3>
+            <p class="description">¿Qué porcentaje de tus ingresos consume cada rubro?</p>
+            <div class="chart-container">
+                <canvas id="categoriaVsIngresos"></canvas>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Evolución: Préstamos / Ingresos</h3>
+            <p class="description">Tendencia mensual del peso de deudas</p>
+            <div class="chart-container">
+                <canvas id="prestamosRatio"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 6: TENDENCIAS -->
+    <div class="section-title">📈 ANÁLISIS DE TENDENCIAS</div>
+    <div class="grid">
+        <div class="card">
+            <h3>Tendencia de Gastos Mensuales</h3>
+            <p class="description">¿Están aumentando o disminuyendo tus gastos?</p>
+            <div class="chart-container">
+                <canvas id="tendenciaGastos"></canvas>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Tendencia: Ratio Gastos/Ingresos</h3>
+            <p class="description">¿Estás mejorando tu situación financiera?</p>
+            <div class="chart-container">
+                <canvas id="tendenciaRatio"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 7: PRESUPUESTADO VS EJECUTADO -->
+    <div class="section-title">🎯 PRESUPUESTO VS EJECUCIÓN</div>
+    <div class="grid">
+        <div class="card">
+            <h3>Áreas Comparativas: Plan vs Real</h3>
+            <p class="description">Visualización del cumplimiento presupuestario</p>
+            <div class="chart-container">
+                <canvas id="presupuestoArea"></canvas>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Límite Presupuestario + Gastos Reales</h3>
+            <p class="description">Línea de límite con curva de ejecución</p>
+            <div class="chart-container">
+                <canvas id="presupuestoLinea"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 8: FLUJO ENTRE CUENTAS -->
+    <div class="section-title">🔄 FLUJO ENTRE ENTIDADES</div>
+    <div class="card">
+        <h3>Transferencias NeuroTEA → Familia</h3>
+        <p class="description">Movimiento mensual de recursos entre entidades</p>
+        <div class="flow-diagram">
+            <div class="flow-box nt">
+                <div class="icon">🏥</div>
+                <div class="title">NeuroTEA</div>
+                <div class="amount">₲ 20.4M ingresos</div>
+            </div>
+            
+            <div class="flow-arrow">
+                <div class="arrow-line">
+                    <svg viewBox="0 0 24 50">
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="5" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#1f2937"/>
+                            </marker>
+                        </defs>
+                        <line x1="12" y1="0" x2="12" y2="40" stroke="#1f2937" stroke-width="3" marker-end="url(#arrowhead)"/>
+                    </svg>
+                </div>
+                <div class="transfer-info">
+                    <div class="transfer-amount">₲ 8.5M</div>
+                    <div class="transfer-label">Honorarios + Salario</div>
+                </div>
+            </div>
+            
+            <div class="flow-box familia">
+                <div class="icon">🏠</div>
+                <div class="title">Familia</div>
+                <div class="amount">₲ 139M ingresos</div>
+            </div>
+        </div>
+        <div class="chart-container" style="height: 200px;">
+            <canvas id="flujoMensual"></canvas>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 9: EXTRAS -->
+    <div class="section-title">📋 ANÁLISIS DETALLADO</div>
+    <div class="grid">
+        <div class="card">
+            <h3>Gastos Variables por Subcategoría</h3>
+            <p class="description">Detalle: supermercado, recreación, combustible, etc.</p>
+            <div class="chart-container">
+                <canvas id="subcategorias"></canvas>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Proyección de Liquidez (30 días)</h3>
+            <p class="description">Estimación del saldo a fin de mes</p>
+            <div class="chart-container">
+                <canvas id="proyeccion"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Paleta Minimalista con colores sobrios pero variados para distribuciones
+        const colors = {
+            // Base minimalista
+            primary: '#1f2937',
+            positive: '#047857',
+            negative: '#dc2626',
+            balance: '#b45309',
+            
+            // Colores sobrios para distribuciones (sin grises)
+            navy: '#1e3a5f',
+            teal: '#0d9488',
+            amber: '#d97706',
+            indigo: '#4338ca',
+            rose: '#be123c',
+            emerald: '#059669',
+            sky: '#0369a1',
+            violet: '#7c3aed',
+            orange: '#c2410c',
+            cyan: '#0891b2'
+        };
+
+        // Paleta específica para donuts - Sobria pero colorida
+        const donutPalette = [
+            '#1e3a5f',  // Navy profundo
+            '#be123c',  // Rose oscuro
+            '#d97706',  // Amber
+            '#4338ca',  // Indigo
+            '#0d9488'   // Teal
+        ];
+        
+        const donutPalette2 = [
+            '#047857',  // Emerald
+            '#b45309',  // Amber oscuro
+            '#0369a1',  // Sky
+            '#7c3aed',  // Violet
+            '#c2410c',  // Orange oscuro
+            '#0891b2'   // Cyan
+        ];
+
+        // Configuración global de Chart.js
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.color = '#4b5563';
+
+        // 1. LIQUIDEZ FAMILIA
+        new Chart(document.getElementById('liquidezFamilia'), {
+            type: 'bar',
+            data: {
+                labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
+                datasets: [{
+                    label: 'Pagos Realizados',
+                    data: [59.8, 12.5, 8.2, 5.0],
+                    backgroundColor: colors.positive,
+                    borderRadius: 4
+                }, {
+                    label: 'Pagos Pendientes',
+                    data: [0, 3.2, 5.5, 8.8],
+                    backgroundColor: colors.negative,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { 
+                        position: 'top',
+                        labels: { usePointStyle: true, padding: 20 } 
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(31,41,55,0.95)',
+                        padding: 12,
+                        callbacks: {
+                            label: ctx => ctx.dataset.label + ': ₲' + ctx.raw.toFixed(1) + 'M'
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { 
+                        ticks: { callback: v => '₲' + v + 'M' }, 
+                        grid: { color: '#f3f4f6' }
+                    }
+                }
+            }
+        });
+
+        // 2. LIQUIDEZ NT
+        new Chart(document.getElementById('liquidezNT'), {
+            type: 'bar',
+            data: {
+                labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
+                datasets: [{
+                    label: 'Pagos Realizados',
+                    data: [4.2, 8.5, 3.8, 2.1],
+                    backgroundColor: colors.sky,
+                    borderRadius: 4
+                }, {
+                    label: 'Pagos Pendientes',
+                    data: [0, 1.5, 2.8, 4.2],
+                    backgroundColor: colors.negative,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { 
+                        position: 'top',
+                        labels: { usePointStyle: true, padding: 20 } 
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(31,41,55,0.95)',
+                        padding: 12,
+                        callbacks: {
+                            label: ctx => ctx.dataset.label + ': ₲' + ctx.raw.toFixed(1) + 'M'
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { 
+                        ticks: { callback: v => '₲' + v + 'M' }, 
+                        grid: { color: '#f3f4f6' }
+                    }
+                }
+            }
+        });
+
+        // 3. BALANCE MENSUAL
+        new Chart(document.getElementById('balanceMensual'), {
+            type: 'bar',
+            data: {
+                labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                datasets: [{
+                    label: 'Ingresos',
+                    data: [139, 85, 90, 88, 92, 95, 88, 91, 89, 93, 96, 145],
+                    backgroundColor: colors.positive,
+                    borderRadius: 4,
+                    order: 2
+                }, {
+                    label: 'Egresos',
+                    data: [95, 78, 82, 85, 88, 80, 83, 79, 81, 86, 84, 110],
+                    backgroundColor: colors.negative,
+                    borderRadius: 4,
+                    order: 2
+                }, {
+                    label: 'Balance',
+                    data: [44, 7, 8, 3, 4, 15, 5, 12, 8, 7, 12, 35],
+                    type: 'line',
+                    borderColor: colors.balance,
+                    backgroundColor: 'rgba(180,83,9,0.1)',
+                    borderWidth: 4,
+                    pointBackgroundColor: colors.balance,
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 3,
+                    pointRadius: 7,
+                    pointHoverRadius: 10,
+                    tension: 0.4,
+                    fill: false,
+                    order: 1,
+                    yAxisID: 'y1'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: { 
+                    legend: { 
+                        position: 'top',
+                        labels: { usePointStyle: true, padding: 16 } 
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(31,41,55,0.95)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        padding: 14,
+                        displayColors: true,
+                        callbacks: {
+                            label: ctx => {
+                                let label = ctx.dataset.label + ': ₲' + ctx.raw + 'M';
+                                if (ctx.dataset.label === 'Balance') {
+                                    label += ctx.raw >= 10 ? ' ✅ Bien' : ctx.raw >= 0 ? ' ⚠️ Ajustado' : ' 🔴 Déficit';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { 
+                        ticks: { callback: v => '₲' + v + 'M' }, 
+                        grid: { color: '#f3f4f6' },
+                        position: 'left'
+                    },
+                    y1: {
+                        ticks: { 
+                            callback: v => '₲' + v + 'M',
+                            color: colors.balance,
+                            font: { weight: '600' }
+                        },
+                        grid: { display: false },
+                        position: 'right',
+                        min: -20,
+                        max: 60
+                    }
+                }
+            }
+        });
+
+        // 4. BALANCE ACUMULADO
+        new Chart(document.getElementById('balanceAcumulado'), {
+            type: 'line',
+            data: {
+                labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                datasets: [{
+                    label: 'Ahorro Acumulado',
+                    data: [44, 51, 59, 62, 66, 81, 86, 98, 106, 113, 125, 160],
+                    borderColor: colors.positive,
+                    backgroundColor: 'rgba(4,120,87,0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointRadius: 4,
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(31,41,55,0.95)',
+                        padding: 12,
+                        callbacks: {
+                            label: ctx => 'Acumulado: ₲' + ctx.raw + 'M'
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { 
+                        ticks: { callback: v => '₲' + v + 'M' }, 
+                        grid: { color: '#f3f4f6' }
+                    }
+                }
+            }
+        });
+
+        // 5. GASTOS POR CATEGORÍA (Donut) - COLORIDO SIN GRISES
+        new Chart(document.getElementById('gastosCategoria'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Gastos Fijos', 'Cuotas/Préstamos', 'Variables', 'Obligaciones', 'Suscripciones'],
+                datasets: [{
+                    data: [35, 38, 18, 6, 3],
+                    backgroundColor: donutPalette,
+                    borderWidth: 3,
+                    borderColor: '#fff',
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '60%',
+                plugins: {
+                    legend: { 
+                        position: 'right', 
+                        labels: { 
+                            usePointStyle: true,
+                            padding: 14,
+                            font: { size: 12 }
+                        } 
+                    },
+                    tooltip: { 
+                        backgroundColor: 'rgba(31,41,55,0.95)',
+                        padding: 12,
+                        callbacks: { label: ctx => ctx.label + ': ' + ctx.raw + '%' } 
+                    }
+                }
+            }
+        });
+
+        // 6. GASTOS TIPO (Horizontal Bar) - COLORIDO
+        new Chart(document.getElementById('gastosTipo'), {
+            type: 'bar',
+            data: {
+                labels: ['Préstamos/Cuotas', 'Gastos Fijos', 'Variables', 'Ahorro'],
+                datasets: [{
+                    data: [38, 35, 18, 9],
+                    backgroundColor: [colors.rose, colors.navy, colors.amber, colors.teal],
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(31,41,55,0.95)',
+                        callbacks: { label: ctx => ctx.raw + '% del total' }
+                    }
+                },
+                scales: {
+                    x: { 
+                        ticks: { callback: v => v + '%' }, 
+                        grid: { color: '#f3f4f6' },
+                        max: 50
+                    },
+                    y: { grid: { display: false } }
+                }
+            }
+        });
+
+        // 7. CATEGORÍA VS INGRESOS - COLORIDO
+        new Chart(document.getElementById('categoriaVsIngresos'), {
+            type: 'bar',
+            data: {
+                labels: ['Préstamos', 'Salarios Dom.', 'Obligaciones', 'Variables', 'Servicios', 'Ahorro'],
+                datasets: [{
+                    label: '% de Ingresos',
+                    data: [38, 15, 12, 10, 8, 7],
+                    backgroundColor: [colors.rose, colors.navy, colors.indigo, colors.amber, colors.sky, colors.teal],
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(31,41,55,0.95)',
+                        callbacks: { label: ctx => ctx.raw + '% de los ingresos' }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { 
+                        ticks: { callback: v => v + '%' }, 
+                        grid: { color: '#f3f4f6' }, 
+                        max: 50 
+                    }
+                }
+            }
+        });
+
+        // 8. RATIO PRÉSTAMOS
+        new Chart(document.getElementById('prestamosRatio'), {
+            type: 'line',
+            data: {
+                labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                datasets: [{
+                    label: 'Préstamos/Ingresos %',
+                    data: [38, 40, 42, 41, 43, 44, 43, 45, 44, 42, 41, 38],
+                    borderColor: colors.negative,
+                    backgroundColor: 'rgba(220,38,38,0.08)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointRadius: 4
+                }, {
+                    label: 'Meta máxima (30%)',
+                    data: [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+                    borderColor: colors.positive,
+                    borderDash: [8, 4],
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { 
+                        position: 'top',
+                        labels: { usePointStyle: true, padding: 16 } 
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(31,41,55,0.95)',
+                        callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.raw + '%' }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { 
+                        ticks: { callback: v => v + '%' }, 
+                        grid: { color: '#f3f4f6' }, 
+                        min: 0, 
+                        max: 60 
+                    }
+                }
+            }
+        });
+
+        // 9. TENDENCIA GASTOS
+        new Chart(document.getElementById('tendenciaGastos'), {
+            type: 'line',
+            data: {
+                labels: ['Ene 25', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic', 'Ene 26'],
+                datasets: [{
+                    label: 'Gastos Totales',
+                    data: [75, 78, 80, 82, 85, 83, 86, 88, 87, 89, 91, 93, 95],
+                    borderColor: colors.negative,
+                    backgroundColor: 'rgba(220,38,38,0.06)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3
+                }, {
+                    label: 'Tendencia',
+                    data: [75, 76.5, 78, 79.5, 81, 82.5, 84, 85.5, 87, 88.5, 90, 91.5, 93],
+                    borderColor: colors.primary,
+                    borderDash: [10, 5],
+                    borderWidth: 2,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { 
+                        position: 'top',
+                        labels: { usePointStyle: true, padding: 16 } 
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(31,41,55,0.95)',
+                        callbacks: { label: ctx => ctx.dataset.label + ': ₲' + ctx.raw + 'M' }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { 
+                        ticks: { callback: v => '₲' + v + 'M' }, 
+                        grid: { color: '#f3f4f6' }
+                    }
+                }
+            }
+        });
+
+        // 10. TENDENCIA RATIO
+        new Chart(document.getElementById('tendenciaRatio'), {
+            type: 'line',
+            data: {
+                labels: ['Ene 25', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic', 'Ene 26'],
+                datasets: [{
+                    label: 'Gastos/Ingresos %',
+                    data: [68, 70, 72, 74, 73, 71, 72, 70, 69, 71, 70, 68, 72],
+                    borderColor: colors.primary,
+                    backgroundColor: 'rgba(31,41,55,0.06)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3
+                }, {
+                    label: 'Meta saludable (65%)',
+                    data: [65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65],
+                    borderColor: colors.positive,
+                    borderDash: [8, 4],
+                    borderWidth: 2,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { 
+                        position: 'top',
+                        labels: { usePointStyle: true, padding: 16 } 
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(31,41,55,0.95)',
+                        callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.raw + '%' }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { 
+                        ticks: { callback: v => v + '%' }, 
+                        grid: { color: '#f3f4f6' }, 
+                        min: 50, 
+                        max: 85 
+                    }
+                }
+            }
+        });
+
+        // 11. PRESUPUESTO ÁREA
+        new Chart(document.getElementById('presupuestoArea'), {
+            type: 'line',
+            data: {
+                labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                datasets: [{
+                    label: 'Presupuestado',
+                    data: [85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 100],
+                    borderColor: colors.primary,
+                    backgroundColor: 'rgba(31,41,55,0.15)',
+                    fill: true,
+                    tension: 0.1,
+                    borderWidth: 2
+                }, {
+                    label: 'Ejecutado',
+                    data: [95, 78, 82, 88, 91, 80, 83, 79, 81, 86, 84, null],
+                    borderColor: colors.teal,
+                    backgroundColor: 'rgba(13,148,136,0.15)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { 
+                        position: 'top',
+                        labels: { usePointStyle: true, padding: 16 } 
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(31,41,55,0.95)',
+                        callbacks: { label: ctx => ctx.dataset.label + ': ₲' + ctx.raw + 'M' }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { 
+                        ticks: { callback: v => '₲' + v + 'M' }, 
+                        grid: { color: '#f3f4f6' }
+                    }
+                }
+            }
+        });
+
+        // 12. PRESUPUESTO LÍNEA LÍMITE
+        new Chart(document.getElementById('presupuestoLinea'), {
+            type: 'line',
+            data: {
+                labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'],
+                datasets: [{
+                    label: 'Límite Presupuestado',
+                    data: [21, 42, 63, 85],
+                    borderColor: colors.negative,
+                    borderWidth: 3,
+                    borderDash: [10, 5],
+                    pointRadius: 0,
+                    fill: false
+                }, {
+                    label: 'Gasto Acumulado Real',
+                    data: [25, 48, 68, 95],
+                    borderColor: colors.balance,
+                    backgroundColor: 'rgba(180,83,9,0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointRadius: 5,
+                    pointBackgroundColor: colors.balance
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { 
+                        position: 'top',
+                        labels: { usePointStyle: true, padding: 16 } 
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(31,41,55,0.95)',
+                        callbacks: { label: ctx => ctx.dataset.label + ': ₲' + ctx.raw + 'M' }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { 
+                        ticks: { callback: v => '₲' + v + 'M' }, 
+                        grid: { color: '#f3f4f6' }
+                    }
+                }
+            }
+        });
+
+        // 13. FLUJO MENSUAL NT->FAM
+        new Chart(document.getElementById('flujoMensual'), {
+            type: 'bar',
+            data: {
+                labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Transferencia NT → Familia',
+                    data: [8.5, 6.2, 7.8, 5.5, 9.2, 7.0],
+                    backgroundColor: colors.primary,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(31,41,55,0.95)',
+                        callbacks: { label: ctx => 'Transferido: ₲' + ctx.raw + 'M' }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { 
+                        ticks: { callback: v => '₲' + v + 'M' }, 
+                        grid: { color: '#f3f4f6' }
+                    }
+                }
+            }
+        });
+
+        // 14. SUBCATEGORÍAS - COLORIDO SIN GRISES
+        new Chart(document.getElementById('subcategorias'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Supermercado', 'Recreación', 'Combustible', 'Gastos Varios', 'Alimentación', 'Salud'],
+                datasets: [{
+                    data: [35, 20, 15, 12, 10, 8],
+                    backgroundColor: donutPalette2,
+                    borderWidth: 3,
+                    borderColor: '#fff',
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '55%',
+                plugins: {
+                    legend: { 
+                        position: 'right',
+                        labels: { 
+                            usePointStyle: true, 
+                            padding: 12,
+                            font: { size: 11 }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(31,41,55,0.95)',
+                        callbacks: { label: ctx => ctx.label + ': ' + ctx.raw + '%' }
+                    }
+                }
+            }
+        });
+
+        // 15. PROYECCIÓN
+        new Chart(document.getElementById('proyeccion'), {
+            type: 'line',
+            data: {
+                labels: ['Hoy', '+5d', '+10d', '+15d', '+20d', '+25d', '+30d'],
+                datasets: [{
+                    label: 'Saldo Proyectado',
+                    data: [18.5, 16.2, 14.8, 12.5, 15.8, 13.2, 11.5],
+                    borderColor: colors.sky,
+                    backgroundColor: 'rgba(3,105,161,0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3
+                }, {
+                    label: 'Mínimo de Seguridad',
+                    data: [5, 5, 5, 5, 5, 5, 5],
+                    borderColor: colors.negative,
+                    borderDash: [8, 4],
+                    borderWidth: 2,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { 
+                        position: 'top',
+                        labels: { usePointStyle: true, padding: 16 } 
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(31,41,55,0.95)',
+                        callbacks: { label: ctx => ctx.dataset.label + ': ₲' + ctx.raw + 'M' }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { 
+                        ticks: { callback: v => '₲' + v + 'M' }, 
+                        grid: { color: '#f3f4f6' }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
