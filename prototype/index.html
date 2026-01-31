@@ -3,20 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FinanzasApp - Prototipo</title>
+  <title>FinanzasApp - Prototipo Completo</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
-    /* ============================================================
-       VARIABLES CSS - PALETA DE COLORES
-       ============================================================ */
     :root {
-      /* Colores principales */
       --primary: #1f2937;
       --positive: #047857;
       --negative: #dc2626;
       --balance: #b45309;
-
-      /* Colores secundarios */
       --navy: #1e3a5f;
       --teal: #0d9488;
       --amber: #d97706;
@@ -27,1261 +21,678 @@
       --violet: #7c3aed;
       --orange: #c2410c;
       --cyan: #0891b2;
-
-      /* Fondos */
       --bg-primary: #f3f4f6;
       --bg-card: #ffffff;
       --bg-sidebar: #1f2937;
       --border: #e5e7eb;
-
-      /* Texto */
       --text-primary: #1f2937;
       --text-secondary: #6b7280;
       --text-light: #9ca3af;
       --text-white: #ffffff;
-
-      /* Dimensiones */
       --sidebar-width: 240px;
       --header-height: 64px;
     }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.5; }
 
-    /* ============================================================
-       RESET Y BASE
-       ============================================================ */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    /* LOGIN */
+    #login-screen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #1f2937 0%, #374151 100%); padding: 20px; }
+    .login-logo { margin-bottom: 40px; text-align: center; }
+    .login-logo h1 { color: white; font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+    .login-logo p { color: var(--text-light); font-size: 16px; }
+    .entity-selector { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
+    .entity-card { background: white; border-radius: 16px; padding: 40px; width: 280px; text-align: center; cursor: pointer; transition: all 0.3s; border: 3px solid transparent; }
+    .entity-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+    .entity-card.familia:hover { border-color: var(--indigo); }
+    .entity-card.neurotea:hover { border-color: var(--teal); }
+    .entity-icon { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 36px; }
+    .entity-card.familia .entity-icon { background: linear-gradient(135deg, var(--indigo), var(--violet)); }
+    .entity-card.neurotea .entity-icon { background: linear-gradient(135deg, var(--teal), var(--emerald)); }
+    .entity-card h2 { font-size: 24px; margin-bottom: 8px; }
+    .entity-card p { color: var(--text-secondary); font-size: 14px; margin-bottom: 20px; }
+    .entity-btn { background: var(--primary); color: white; border: none; padding: 12px 32px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; }
+    .entity-card.familia .entity-btn { background: var(--indigo); }
+    .entity-card.neurotea .entity-btn { background: var(--teal); }
+    .login-footer { margin-top: 40px; color: var(--text-light); font-size: 14px; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-      background-color: var(--bg-primary);
-      color: var(--text-primary);
-      line-height: 1.5;
-    }
+    /* LAYOUT */
+    #main-app { display: none; min-height: 100vh; }
+    .header { position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: var(--header-height); background: white; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 100; }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .header-title { font-size: 20px; font-weight: 600; }
+    .header-entity { background: var(--indigo); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .header-entity.neurotea { background: var(--teal); }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    .month-selector { display: flex; align-items: center; gap: 8px; background: var(--bg-primary); padding: 8px 16px; border-radius: 8px; }
+    .month-selector select { border: none; background: transparent; font-size: 14px; font-weight: 500; cursor: pointer; outline: none; }
+    .btn-switch { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 14px; cursor: pointer; }
 
-    /* ============================================================
-       PANTALLA DE LOGIN (SELECCIÓN DE ENTIDAD)
-       ============================================================ */
-    #login-screen {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-      padding: 20px;
-    }
+    .sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-width); height: 100vh; background: var(--bg-sidebar); padding: 20px 0; z-index: 200; }
+    .sidebar-logo { padding: 0 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
+    .sidebar-logo h1 { color: white; font-size: 20px; display: flex; align-items: center; gap: 10px; }
+    .sidebar-nav { list-style: none; }
+    .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 14px; transition: all 0.2s; border-left: 3px solid transparent; }
+    .sidebar-nav a:hover { background: rgba(255,255,255,0.05); color: white; }
+    .sidebar-nav a.active { background: rgba(255,255,255,0.1); color: white; border-left-color: var(--teal); }
+    .sidebar-nav .icon { font-size: 18px; width: 24px; text-align: center; }
+    .sidebar-footer { position: absolute; bottom: 20px; left: 0; right: 0; padding: 0 20px; }
+    .sidebar-footer a { display: flex; align-items: center; gap: 12px; padding: 12px; color: rgba(255,255,255,0.5); text-decoration: none; font-size: 13px; border-radius: 8px; }
+    .sidebar-footer a:hover { background: rgba(255,255,255,0.05); color: white; }
 
-    .login-logo {
-      margin-bottom: 40px;
-      text-align: center;
-    }
+    .content { margin-left: var(--sidebar-width); margin-top: var(--header-height); padding: 24px; min-height: calc(100vh - var(--header-height)); }
 
-    .login-logo h1 {
-      color: var(--text-white);
-      font-size: 32px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
-    .login-logo p {
-      color: var(--text-light);
-      font-size: 16px;
-    }
-
-    .entity-selector {
-      display: flex;
-      gap: 24px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .entity-card {
-      background: var(--bg-card);
-      border-radius: 16px;
-      padding: 40px;
-      width: 280px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      border: 3px solid transparent;
-    }
-
-    .entity-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-    }
-
-    .entity-card.familia:hover {
-      border-color: var(--indigo);
-    }
-
-    .entity-card.neurotea:hover {
-      border-color: var(--teal);
-    }
-
-    .entity-icon {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 20px;
-      font-size: 36px;
-    }
-
-    .entity-card.familia .entity-icon {
-      background: linear-gradient(135deg, var(--indigo), var(--violet));
-    }
-
-    .entity-card.neurotea .entity-icon {
-      background: linear-gradient(135deg, var(--teal), var(--emerald));
-    }
-
-    .entity-card h2 {
-      font-size: 24px;
-      margin-bottom: 8px;
-      color: var(--text-primary);
-    }
-
-    .entity-card p {
-      color: var(--text-secondary);
-      font-size: 14px;
-      margin-bottom: 20px;
-    }
-
-    .entity-btn {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 12px 32px;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .entity-card.familia .entity-btn {
-      background: var(--indigo);
-    }
-
-    .entity-card.neurotea .entity-btn {
-      background: var(--teal);
-    }
-
-    .entity-btn:hover {
-      opacity: 0.9;
-    }
-
-    .login-footer {
-      margin-top: 40px;
-      color: var(--text-light);
-      font-size: 14px;
-    }
-
-    /* ============================================================
-       LAYOUT PRINCIPAL
-       ============================================================ */
-    #main-app {
-      display: none;
-      min-height: 100vh;
-    }
-
-    /* Header */
-    .header {
-      position: fixed;
-      top: 0;
-      left: var(--sidebar-width);
-      right: 0;
-      height: var(--header-height);
-      background: var(--bg-card);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 24px;
-      z-index: 100;
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .header-title {
-      font-size: 20px;
-      font-weight: 600;
-    }
-
-    .header-entity {
-      background: var(--indigo);
-      color: white;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .header-entity.neurotea {
-      background: var(--teal);
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .month-selector {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--bg-primary);
-      padding: 8px 16px;
-      border-radius: 8px;
-    }
-
-    .month-selector select {
-      border: none;
-      background: transparent;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      outline: none;
-    }
-
-    .btn-switch-entity {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 14px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    /* Sidebar */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: var(--sidebar-width);
-      height: 100vh;
-      background: var(--bg-sidebar);
-      padding: 20px 0;
-      z-index: 200;
-    }
-
-    .sidebar-logo {
-      padding: 0 20px 20px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      margin-bottom: 20px;
-    }
-
-    .sidebar-logo h1 {
-      color: white;
-      font-size: 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .sidebar-logo span {
-      font-size: 24px;
-    }
-
-    .sidebar-nav {
-      list-style: none;
-    }
-
-    .sidebar-nav li {
-      margin-bottom: 4px;
-    }
-
-    .sidebar-nav a {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 20px;
-      color: rgba(255,255,255,0.7);
-      text-decoration: none;
-      font-size: 14px;
-      transition: all 0.2s;
-      border-left: 3px solid transparent;
-    }
-
-    .sidebar-nav a:hover {
-      background: rgba(255,255,255,0.05);
-      color: white;
-    }
-
-    .sidebar-nav a.active {
-      background: rgba(255,255,255,0.1);
-      color: white;
-      border-left-color: var(--teal);
-    }
-
-    .sidebar-nav .icon {
-      font-size: 18px;
-      width: 24px;
-      text-align: center;
-    }
-
-    .sidebar-footer {
-      position: absolute;
-      bottom: 20px;
-      left: 0;
-      right: 0;
-      padding: 0 20px;
-    }
-
-    .sidebar-footer a {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px;
-      color: rgba(255,255,255,0.5);
-      text-decoration: none;
-      font-size: 13px;
-      border-radius: 8px;
-      transition: all 0.2s;
-    }
-
-    .sidebar-footer a:hover {
-      background: rgba(255,255,255,0.05);
-      color: white;
-    }
-
-    /* Content */
-    .content {
-      margin-left: var(--sidebar-width);
-      margin-top: var(--header-height);
-      padding: 24px;
-      min-height: calc(100vh - var(--header-height));
-    }
-
-    /* ============================================================
-       COMPONENTES - KPI CARDS
-       ============================================================ */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 20px;
-      margin-bottom: 24px;
-    }
-
-    .kpi-card {
-      background: var(--bg-card);
-      border-radius: 12px;
-      padding: 20px;
-      border-left: 4px solid var(--border);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-
+    /* COMPONENTS */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 24px; }
+    .kpi-card { background: white; border-radius: 12px; padding: 20px; border-left: 4px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
     .kpi-card.blue { border-left-color: #3b82f6; }
     .kpi-card.green { border-left-color: var(--positive); }
     .kpi-card.red { border-left-color: var(--negative); }
     .kpi-card.amber { border-left-color: var(--balance); }
-
-    .kpi-label {
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .kpi-value {
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
+    .kpi-card.teal { border-left-color: var(--teal); }
+    .kpi-card.violet { border-left-color: var(--violet); }
+    .kpi-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
     .kpi-card.blue .kpi-value { color: #1d4ed8; }
     .kpi-card.green .kpi-value { color: var(--positive); }
     .kpi-card.red .kpi-value { color: var(--negative); }
     .kpi-card.amber .kpi-value { color: var(--balance); }
+    .kpi-card.teal .kpi-value { color: var(--teal); }
+    .kpi-card.violet .kpi-value { color: var(--violet); }
+    .kpi-detail { font-size: 12px; color: var(--text-secondary); }
 
-    .kpi-detail {
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
+    .charts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 24px; }
+    .charts-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 24px; }
+    .chart-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .chart-card.full { grid-column: span 2; }
+    .chart-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 16px; color: var(--text-primary); }
+    .chart-container { position: relative; height: 250px; }
+    .chart-container.small { height: 200px; }
 
-    /* ============================================================
-       COMPONENTES - CHARTS
-       ============================================================ */
-    .charts-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-      margin-bottom: 24px;
-    }
+    .table-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 24px; }
+    .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .table-header h3 { font-size: 15px; font-weight: 600; }
+    .btn-primary { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+    .btn-secondary { background: white; color: var(--primary); border: 1px solid var(--border); padding: 8px 16px; border-radius: 8px; font-size: 14px; cursor: pointer; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 13px; }
+    th { font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight: 600; letter-spacing: 0.5px; background: var(--bg-primary); }
+    tr:hover { background: var(--bg-primary); }
+    .amount-positive { color: var(--positive); font-weight: 600; }
+    .amount-negative { color: var(--negative); font-weight: 600; }
+    .status-badge { display: inline-block; padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+    .status-badge.pagado { background: #dcfce7; color: var(--positive); }
+    .status-badge.pendiente { background: #fef3c7; color: var(--balance); }
+    .status-badge.cancelado { background: #fee2e2; color: var(--negative); }
 
-    @media (max-width: 1200px) {
-      .charts-grid {
-        grid-template-columns: 1fr;
-      }
-    }
+    .balance-cruzado { background: linear-gradient(135deg, var(--navy) 0%, var(--indigo) 100%); border-radius: 12px; padding: 24px; color: white; margin-bottom: 24px; }
+    .balance-cruzado h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8; margin-bottom: 12px; }
+    .balance-cruzado-grid { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px; }
+    .balance-item { text-align: center; }
+    .balance-item .label { font-size: 12px; opacity: 0.8; margin-bottom: 4px; }
+    .balance-item .value { font-size: 22px; font-weight: 700; }
+    .balance-arrow { font-size: 24px; opacity: 0.5; }
 
-    .chart-card {
-      background: var(--bg-card);
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
+    .filters { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .filters input, .filters select { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; }
+    .filters input { width: 200px; }
 
-    .chart-card h3 {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 16px;
-      color: var(--text-primary);
-    }
+    .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--text-secondary); }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .form-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
 
-    .chart-container {
-      position: relative;
-      height: 280px;
-    }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .modal { background: white; border-radius: 16px; padding: 24px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
+    .modal h2 { font-size: 18px; margin-bottom: 20px; }
 
-    /* ============================================================
-       COMPONENTES - TABLAS
-       ============================================================ */
-    .table-card {
-      background: var(--bg-card);
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
+    .saldo-cuenta { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .saldo-cuenta:last-child { border-bottom: none; }
+    .saldo-cuenta .nombre { font-weight: 500; }
+    .saldo-cuenta .monto { font-weight: 600; }
 
-    .table-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
+    .presupuesto-table { overflow-x: auto; }
+    .presupuesto-table table { min-width: 1200px; }
+    .presupuesto-table th, .presupuesto-table td { text-align: right; padding: 8px 10px; font-size: 12px; }
+    .presupuesto-table th:first-child, .presupuesto-table td:first-child { text-align: left; position: sticky; left: 0; background: white; min-width: 180px; }
+    .presupuesto-table tr.subtotal { background: var(--bg-primary); font-weight: 600; }
+    .presupuesto-table tr.total { background: var(--primary); color: white; font-weight: 700; }
+    .presupuesto-table input { width: 80px; padding: 4px 6px; border: 1px solid var(--border); border-radius: 4px; text-align: right; font-size: 12px; }
 
-    .table-header h3 {
-      font-size: 16px;
-      font-weight: 600;
-    }
+    .config-section { margin-bottom: 32px; }
+    .config-section h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--border); }
+    .config-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .config-item:last-child { border-bottom: none; }
+    .tag { display: inline-block; background: var(--bg-primary); padding: 4px 10px; border-radius: 20px; font-size: 12px; margin: 2px; }
+    .tag.deletable { cursor: pointer; }
+    .tag.deletable:hover { background: #fee2e2; color: var(--negative); }
 
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 14px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+    .vencimientos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+    .vencimiento-card { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .vencimiento-card h4 { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; text-transform: uppercase; }
+    .vencimiento-card.atrasado { border-left: 4px solid var(--negative); }
+    .vencimiento-card.esta-semana { border-left: 4px solid var(--amber); }
+    .vencimiento-card.proxima { border-left: 4px solid var(--teal); }
+    .vencimiento-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .vencimiento-item:last-child { border-bottom: none; }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      padding: 12px;
-      text-align: left;
-      border-bottom: 1px solid var(--border);
-    }
-
-    th {
-      font-size: 12px;
-      text-transform: uppercase;
-      color: var(--text-secondary);
-      font-weight: 600;
-      letter-spacing: 0.5px;
-    }
-
-    td {
-      font-size: 14px;
-    }
-
-    tr:hover {
-      background: var(--bg-primary);
-    }
-
-    .amount-positive {
-      color: var(--positive);
-      font-weight: 600;
-    }
-
-    .amount-negative {
-      color: var(--negative);
-      font-weight: 600;
-    }
-
-    .status-badge {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 500;
-    }
-
-    .status-badge.pagado {
-      background: #dcfce7;
-      color: var(--positive);
-    }
-
-    .status-badge.pendiente {
-      background: #fef3c7;
-      color: var(--balance);
-    }
-
-    /* ============================================================
-       COMPONENTES - BALANCE CRUZADO
-       ============================================================ */
-    .balance-cruzado {
-      background: linear-gradient(135deg, var(--navy) 0%, var(--indigo) 100%);
-      border-radius: 12px;
-      padding: 24px;
-      color: white;
-      margin-bottom: 24px;
-    }
-
-    .balance-cruzado h3 {
-      font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      opacity: 0.8;
-      margin-bottom: 12px;
-    }
-
-    .balance-cruzado-grid {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .balance-item {
-      text-align: center;
-    }
-
-    .balance-item .label {
-      font-size: 13px;
-      opacity: 0.8;
-      margin-bottom: 4px;
-    }
-
-    .balance-item .value {
-      font-size: 24px;
-      font-weight: 700;
-    }
-
-    .balance-arrow {
-      font-size: 24px;
-      opacity: 0.5;
-    }
-
-    /* ============================================================
-       RESPONSIVE
-       ============================================================ */
-    @media (max-width: 768px) {
-      .sidebar {
-        transform: translateX(-100%);
-        transition: transform 0.3s;
-      }
-
-      .sidebar.open {
-        transform: translateX(0);
-      }
-
-      .header {
-        left: 0;
-      }
-
-      .content {
-        margin-left: 0;
-      }
-
-      .entity-selector {
-        flex-direction: column;
-      }
-
-      .entity-card {
-        width: 100%;
-        max-width: 320px;
-      }
-
-      .kpi-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .balance-cruzado-grid {
-        grid-template-columns: 1fr;
-        text-align: center;
-      }
-
-      .balance-arrow {
-        transform: rotate(90deg);
-      }
-    }
+    @media (max-width: 1200px) { .charts-grid, .charts-grid-3 { grid-template-columns: 1fr; } .chart-card.full { grid-column: span 1; } }
+    @media (max-width: 768px) { .sidebar { transform: translateX(-100%); } .header { left: 0; } .content { margin-left: 0; } .form-grid { grid-template-columns: 1fr; } .vencimientos-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
 
-  <!-- ============================================================
-       PANTALLA DE LOGIN
-       ============================================================ -->
-  <div id="login-screen">
-    <div class="login-logo">
-      <h1>FinanzasApp</h1>
-      <p>Sistema de Control Financiero</p>
+<div id="login-screen">
+  <div class="login-logo">
+    <h1>💰 FinanzasApp</h1>
+    <p>Sistema de Control Financiero</p>
+  </div>
+  <div class="entity-selector">
+    <div class="entity-card familia" onclick="enterApp('FAMILIA')">
+      <div class="entity-icon">👨‍👩‍👧‍👦</div>
+      <h2>FAMILIA</h2>
+      <p>Finanzas del hogar<br>Marco y Clara</p>
+      <button class="entity-btn">Entrar</button>
     </div>
-
-    <div class="entity-selector">
-      <div class="entity-card familia" onclick="enterApp('FAMILIA')">
-        <div class="entity-icon">
-          &#128106;
-        </div>
-        <h2>FAMILIA</h2>
-        <p>Finanzas del hogar<br>Marco y Clara</p>
-        <button class="entity-btn">Entrar</button>
-      </div>
-
-      <div class="entity-card neurotea" onclick="enterApp('NEUROTEA')">
-        <div class="entity-icon">
-          &#127973;
-        </div>
-        <h2>NEUROTEA</h2>
-        <p>Clínica de Terapias<br>Control empresarial</p>
-        <button class="entity-btn">Entrar</button>
-      </div>
-    </div>
-
-    <div class="login-footer">
-      Versión 1.0 - Prototipo
+    <div class="entity-card neurotea" onclick="enterApp('NEUROTEA')">
+      <div class="entity-icon">🏥</div>
+      <h2>NEUROTEA</h2>
+      <p>Clínica de Terapias<br>Control empresarial</p>
+      <button class="entity-btn">Entrar</button>
     </div>
   </div>
+  <div class="login-footer">Versión 1.0 - Prototipo Completo</div>
+</div>
 
-  <!-- ============================================================
-       APLICACIÓN PRINCIPAL
-       ============================================================ -->
-  <div id="main-app">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar-logo">
-        <h1><span>&#128176;</span> FinanzasApp</h1>
+<div id="main-app">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><h1>💰 FinanzasApp</h1></div>
+    <ul class="sidebar-nav">
+      <li><a href="#" class="active" onclick="showView('dashboard', this)"><span class="icon">📊</span> Dashboard</a></li>
+      <li><a href="#" onclick="showView('transacciones', this)"><span class="icon">💳</span> Transacciones</a></li>
+      <li><a href="#" onclick="showView('gastos-fijos', this)"><span class="icon">📅</span> Gastos Fijos</a></li>
+      <li><a href="#" onclick="showView('presupuesto', this)"><span class="icon">📈</span> Presupuesto</a></li>
+      <li><a href="#" onclick="showView('reportes', this)"><span class="icon">📑</span> Reportes</a></li>
+      <li><a href="#" onclick="showView('configuracion', this)"><span class="icon">⚙️</span> Configuración</a></li>
+    </ul>
+    <div class="sidebar-footer"><a href="#" onclick="logout()">← Cambiar Entidad</a></div>
+  </aside>
+
+  <header class="header">
+    <div class="header-left">
+      <h2 class="header-title" id="view-title">Dashboard</h2>
+      <span class="header-entity" id="header-entity">FAMILIA</span>
+    </div>
+    <div class="header-right">
+      <div class="month-selector">
+        📅 <select id="month-select" onchange="refreshView()">
+          <option value="1">Enero 2026</option>
+          <option value="2" selected>Febrero 2026</option>
+          <option value="3">Marzo 2026</option>
+          <option value="4">Abril 2026</option>
+          <option value="5">Mayo 2026</option>
+          <option value="6">Junio 2026</option>
+          <option value="7">Julio 2026</option>
+          <option value="8">Agosto 2026</option>
+          <option value="9">Septiembre 2026</option>
+          <option value="10">Octubre 2026</option>
+          <option value="11">Noviembre 2026</option>
+          <option value="12">Diciembre 2026</option>
+        </select>
       </div>
+      <button class="btn-switch" onclick="logout()">🔄 Cambiar</button>
+    </div>
+  </header>
 
-      <ul class="sidebar-nav">
-        <li>
-          <a href="#" class="active" onclick="showView('dashboard')">
-            <span class="icon">&#128200;</span>
-            Dashboard
-          </a>
-        </li>
-        <li>
-          <a href="#" onclick="showView('transacciones')">
-            <span class="icon">&#128179;</span>
-            Transacciones
-          </a>
-        </li>
-        <li>
-          <a href="#" onclick="showView('gastos-fijos')">
-            <span class="icon">&#128197;</span>
-            Gastos Fijos
-          </a>
-        </li>
-        <li>
-          <a href="#" onclick="showView('presupuesto')">
-            <span class="icon">&#128202;</span>
-            Presupuesto
-          </a>
-        </li>
-        <li>
-          <a href="#" onclick="showView('reportes')">
-            <span class="icon">&#128208;</span>
-            Reportes
-          </a>
-        </li>
-        <li>
-          <a href="#" onclick="showView('configuracion')">
-            <span class="icon">&#9881;</span>
-            Configuración
-          </a>
-        </li>
-      </ul>
+  <main class="content" id="main-content"></main>
+</div>
 
-      <div class="sidebar-footer">
-        <a href="#" onclick="logout()">
-          <span class="icon">&#8592;</span>
-          Cambiar Entidad
-        </a>
+<script>
+let currentEntity = null;
+let currentView = 'dashboard';
+window.chartInstances = [];
+
+const COLORS = {
+  DONUT1: ['#1e3a5f', '#be123c', '#d97706', '#4338ca', '#0d9488', '#7c3aed'],
+  DONUT2: ['#047857', '#b45309', '#0369a1', '#7c3aed', '#c2410c', '#0891b2', '#059669', '#4338ca', '#0d9488', '#1e3a5f']
+};
+
+const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+const dataFamilia = {
+  kpis: { ingresos: 18500000, egresos: 15200000, balance: 3300000, ahorro: 2500000, pendientes: 2800000, patrimonio: 45000000 },
+  categorias: { labels: ['Gastos Fijos', 'Cuotas', 'Obligaciones', 'Suscripciones', 'Variables', 'Ahorro'], data: [4500000, 3200000, 1800000, 850000, 2350000, 2500000] },
+  subcategorias: { labels: ['Supermercado', 'Combustible', 'Recreación', 'Salud', 'Ropa', 'Otros'], data: [850000, 420000, 380000, 250000, 200000, 250000] },
+  presupuestoVsReal: { labels: ['G. Fijos', 'Cuotas', 'Oblig.', 'Suscr.', 'Variables', 'Ahorro'], presupuesto: [4800000, 3500000, 2000000, 900000, 3000000, 3000000], real: [4500000, 3200000, 1800000, 850000, 2350000, 2500000] },
+  evolucion: { ingresos: [17500000, 18000000, 18500000], egresos: [14800000, 15500000, 15200000] },
+  saldosCuenta: [
+    { nombre: 'ITAU Marco', saldo: 8500000 },
+    { nombre: 'Coop. Univ. Marco', saldo: 3200000 },
+    { nombre: 'ITAU Clara', saldo: 2800000 },
+    { nombre: 'UENO Clara', saldo: 1500000 },
+    { nombre: 'Efectivo', saldo: 450000 }
+  ],
+  transacciones: [
+    { id: 1, fecha: '28/01/2026', concepto: 'Salario Marco', tipo: 'INGRESO', categoria: '-', monto: 12500000, cuenta: 'ITAU Marco', estado: 'PAGADO' },
+    { id: 2, fecha: '28/01/2026', concepto: 'Honorarios Clara NT', tipo: 'INGRESO', categoria: '-', monto: 3000000, cuenta: 'ITAU Clara', estado: 'PAGADO' },
+    { id: 3, fecha: '05/02/2026', concepto: 'Supermercado', tipo: 'EGRESO', categoria: 'VARIABLES', monto: 850000, cuenta: 'ITAU Clara', estado: 'PAGADO' },
+    { id: 4, fecha: '10/02/2026', concepto: 'ANDE Casa', tipo: 'EGRESO', categoria: 'GASTOS FIJOS', monto: 420000, cuenta: 'ITAU Marco', estado: 'PENDIENTE' },
+    { id: 5, fecha: '15/02/2026', concepto: 'Escuela Niños', tipo: 'EGRESO', categoria: 'GASTOS FIJOS', monto: 1800000, cuenta: 'ITAU Marco', estado: 'PAGADO' },
+    { id: 6, fecha: '01/02/2026', concepto: 'Salario Lili', tipo: 'EGRESO', categoria: 'GASTOS FIJOS', monto: 2500000, cuenta: 'ITAU Marco', estado: 'PAGADO' },
+    { id: 7, fecha: '05/02/2026', concepto: 'Combustible', tipo: 'EGRESO', categoria: 'VARIABLES', monto: 420000, cuenta: 'Efectivo', estado: 'PAGADO' },
+    { id: 8, fecha: '12/02/2026', concepto: 'Préstamo de NeuroTEA', tipo: 'INGRESO', categoria: '-', monto: 2500000, cuenta: 'ITAU Marco', estado: 'PAGADO', linkId: 'ABC123' }
+  ],
+  gastosFijos: [
+    { id: 1, concepto: 'Salario Lili Doméstico', categoria: 'GASTOS FIJOS', dia: 1, cuenta: 'ITAU Marco', monto: 2500000, estado: 'PAGADO' },
+    { id: 2, concepto: 'Salario Laura Doméstico', categoria: 'GASTOS FIJOS', dia: 1, cuenta: 'ITAU Marco', monto: 1800000, estado: 'PAGADO' },
+    { id: 3, concepto: 'Escuela Fabián y Brenda', categoria: 'GASTOS FIJOS', dia: 5, cuenta: 'ITAU Marco', monto: 1800000, estado: 'PAGADO' },
+    { id: 4, concepto: 'ANDE Casa', categoria: 'GASTOS FIJOS', dia: 10, cuenta: 'ITAU Marco', monto: 450000, estado: 'PENDIENTE' },
+    { id: 5, concepto: 'Expensa Casa', categoria: 'GASTOS FIJOS', dia: 10, cuenta: 'ITAU Marco', monto: 350000, estado: 'PENDIENTE' },
+    { id: 6, concepto: 'Préstamo Lizzi', categoria: 'CUOTAS', dia: 15, cuenta: 'Coop. Univ.', monto: 1200000, estado: 'PENDIENTE' },
+    { id: 7, concepto: 'Giganet Internet', categoria: 'SUSCRIPCIONES', dia: 20, cuenta: 'ITAU Clara', monto: 180000, estado: 'PENDIENTE' },
+    { id: 8, concepto: 'Tigo Familiar', categoria: 'SUSCRIPCIONES', dia: 25, cuenta: 'ITAU Clara', monto: 250000, estado: 'PENDIENTE' }
+  ],
+  balanceCruzado: { deudaFamilia: 2500000, deudaNT: 0, neto: -2500000 },
+  presupuestoAnual: [
+    { concepto: 'Salario Marco', tipo: 'INGRESO', valores: [12500000, 12500000, 12500000, 12500000, 12500000, 12500000, 12500000, 12500000, 12500000, 12500000, 12500000, 12500000] },
+    { concepto: 'Honorarios Clara NT', tipo: 'INGRESO', valores: [3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 3000000] },
+    { concepto: 'Salario Lili', tipo: 'EGRESO', cat: 'GASTOS FIJOS', valores: [2500000, 2500000, 2500000, 2500000, 2500000, 2500000, 2500000, 2500000, 2500000, 2500000, 2500000, 2500000] },
+    { concepto: 'Escuela Niños', tipo: 'EGRESO', cat: 'GASTOS FIJOS', valores: [1800000, 1800000, 1800000, 1800000, 1800000, 1800000, 0, 0, 1800000, 1800000, 1800000, 1800000] },
+    { concepto: 'Supermercado', tipo: 'EGRESO', cat: 'VARIABLES', valores: [800000, 850000, 900000, 850000, 800000, 850000, 900000, 850000, 800000, 850000, 900000, 1200000] },
+    { concepto: 'Ahorro Clara', tipo: 'AHORRO', valores: [1000000, 1000000, 1000000, 1000000, 1000000, 1000000, 1000000, 1000000, 1000000, 1000000, 1000000, 1000000] }
+  ]
+};
+
+const dataNeurotea = {
+  kpis: { ingresos: 25000000, egresos: 22500000, ganancia: 2500000, pctGanancia: 10, utilidad: 833333, pendientes: 5000000 },
+  categorias: { labels: ['Clínica', 'Sueldos', 'Telefonía', 'Obligaciones', 'Eventos', 'Variables'], data: [6000000, 8500000, 450000, 2800000, 1200000, 3550000] },
+  subcategorias: { labels: ['Insumos', 'Reparaciones', 'Mant. Aire', 'Gastos Cursos', 'Cumples'], data: [1200000, 800000, 350000, 700000, 500000] },
+  distribucion: { labels: ['Utilidad Marco', 'Fondo Emergencia', 'Fondo Inversión'], data: [833333, 833333, 833334] },
+  evolucion: { ingresos: [23000000, 24000000, 25000000], egresos: [21500000, 22000000, 22500000] },
+  saldosCuenta: [
+    { nombre: 'Atlas NeuroTEA', saldo: 12500000 },
+    { nombre: 'UENO Marco (NT)', saldo: 850000 }
+  ],
+  transacciones: [
+    { id: 1, fecha: '05/02/2026', concepto: 'Aporte Terapeutas', tipo: 'INGRESO', categoria: '-', monto: 18000000, cuenta: 'Atlas NT', estado: 'PAGADO' },
+    { id: 2, fecha: '10/02/2026', concepto: 'Cursos Febrero', tipo: 'INGRESO', categoria: '-', monto: 7000000, cuenta: 'Atlas NT', estado: 'PAGADO' },
+    { id: 3, fecha: '01/02/2026', concepto: 'Alquiler Principal', tipo: 'EGRESO', categoria: 'CLÍNICA', monto: 3500000, cuenta: 'Atlas NT', estado: 'PAGADO' },
+    { id: 4, fecha: '05/02/2026', concepto: 'Sueldo Aracely', tipo: 'EGRESO', categoria: 'SUELDOS', monto: 2500000, cuenta: 'Atlas NT', estado: 'PAGADO' },
+    { id: 5, fecha: '28/02/2026', concepto: 'Salario Marco Admin', tipo: 'EGRESO', categoria: 'SUELDOS', monto: 5000000, cuenta: 'Atlas NT', estado: 'PENDIENTE' },
+    { id: 6, fecha: '12/02/2026', concepto: 'Préstamo NT → Familia', tipo: 'EGRESO', categoria: 'VARIABLES', monto: 2500000, cuenta: 'Atlas NT', estado: 'PAGADO', linkId: 'ABC123' }
+  ],
+  gastosFijos: [
+    { id: 1, concepto: 'Alquiler Principal', categoria: 'CLÍNICA', dia: 1, cuenta: 'Atlas NT', monto: 3500000, estado: 'PAGADO' },
+    { id: 2, concepto: 'Alquiler Secundario', categoria: 'CLÍNICA', dia: 1, cuenta: 'Atlas NT', monto: 2500000, estado: 'PAGADO' },
+    { id: 3, concepto: 'Sueldo Aracely', categoria: 'SUELDOS', dia: 5, cuenta: 'Atlas NT', monto: 2500000, estado: 'PAGADO' },
+    { id: 4, concepto: 'Sueldo Fátima', categoria: 'SUELDOS', dia: 5, cuenta: 'Atlas NT', monto: 2200000, estado: 'PAGADO' },
+    { id: 5, concepto: 'ANDE Clínica', categoria: 'CLÍNICA', dia: 10, cuenta: 'Atlas NT', monto: 850000, estado: 'PENDIENTE' },
+    { id: 6, concepto: 'Salario Marco Admin', categoria: 'SUELDOS', dia: 28, cuenta: 'Atlas NT', monto: 5000000, estado: 'PENDIENTE' }
+  ],
+  balanceCruzado: { deudaFamilia: 2500000, deudaNT: 0, neto: 2500000 },
+  presupuestoAnual: [
+    { concepto: 'Aporte Terapeutas', tipo: 'INGRESO', valores: [18000000, 18000000, 19000000, 18500000, 18000000, 17000000, 15000000, 16000000, 18000000, 19000000, 18000000, 17000000] },
+    { concepto: 'Cursos', tipo: 'INGRESO', valores: [5000000, 7000000, 6000000, 5000000, 4000000, 3000000, 2000000, 3000000, 5000000, 6000000, 5000000, 4000000] },
+    { concepto: 'Alquiler Principal', tipo: 'EGRESO', cat: 'CLÍNICA', valores: [3500000, 3500000, 3500000, 3500000, 3500000, 3500000, 3500000, 3500000, 3500000, 3500000, 3500000, 3500000] },
+    { concepto: 'Sueldos', tipo: 'EGRESO', cat: 'SUELDOS', valores: [8000000, 8000000, 8000000, 8000000, 8000000, 8000000, 8000000, 8000000, 8000000, 8000000, 8000000, 8000000] },
+    { concepto: 'Salario Marco', tipo: 'EGRESO', cat: 'SUELDOS', valores: [5000000, 5000000, 5000000, 5000000, 5000000, 5000000, 5000000, 5000000, 5000000, 5000000, 5000000, 5000000] }
+  ]
+};
+
+function formatMoney(value) {
+  const abs = Math.abs(value);
+  const formatted = new Intl.NumberFormat('es-PY').format(abs);
+  return (value < 0 ? '-' : '') + 'Gs. ' + formatted;
+}
+
+function enterApp(entity) {
+  currentEntity = entity;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('main-app').style.display = 'block';
+  const badge = document.getElementById('header-entity');
+  badge.textContent = entity;
+  badge.className = 'header-entity' + (entity === 'NEUROTEA' ? ' neurotea' : '');
+  showView('dashboard', document.querySelector('.sidebar-nav a'));
+}
+
+function logout() {
+  currentEntity = null;
+  document.getElementById('main-app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  destroyCharts();
+}
+
+function destroyCharts() {
+  window.chartInstances.forEach(c => c.destroy());
+  window.chartInstances = [];
+}
+
+function refreshView() {
+  const activeLink = document.querySelector('.sidebar-nav a.active');
+  showView(currentView, activeLink);
+}
+
+function showView(view, link) {
+  currentView = view;
+  document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+  if (link) link.classList.add('active');
+
+  const titles = { 'dashboard': 'Dashboard', 'transacciones': 'Transacciones', 'gastos-fijos': 'Gastos Fijos', 'presupuesto': 'Presupuesto', 'reportes': 'Reportes Anuales', 'configuracion': 'Configuración' };
+  document.getElementById('view-title').textContent = titles[view] || 'Dashboard';
+
+  destroyCharts();
+  const content = document.getElementById('main-content');
+
+  switch(view) {
+    case 'dashboard': renderDashboard(content); break;
+    case 'transacciones': renderTransacciones(content); break;
+    case 'gastos-fijos': renderGastosFijos(content); break;
+    case 'presupuesto': renderPresupuesto(content); break;
+    case 'reportes': renderReportes(content); break;
+    case 'configuracion': renderConfiguracion(content); break;
+  }
+}
+
+function renderDashboard(container) {
+  const data = currentEntity === 'FAMILIA' ? dataFamilia : dataNeurotea;
+  const isFam = currentEntity === 'FAMILIA';
+
+  let html = '<div class="kpi-grid">';
+  if (isFam) {
+    html += `
+      <div class="kpi-card blue"><div class="kpi-label">Ingresos del Mes</div><div class="kpi-value">${formatMoney(data.kpis.ingresos)}</div><div class="kpi-detail">Total recibido</div></div>
+      <div class="kpi-card red"><div class="kpi-label">Egresos Pagados</div><div class="kpi-value">${formatMoney(data.kpis.egresos)}</div><div class="kpi-detail">Total pagado</div></div>
+      <div class="kpi-card amber"><div class="kpi-label">Balance</div><div class="kpi-value">${formatMoney(data.kpis.balance)}</div><div class="kpi-detail">Disponible</div></div>
+      <div class="kpi-card green"><div class="kpi-label">Ahorro del Mes</div><div class="kpi-value">${formatMoney(data.kpis.ahorro)}</div><div class="kpi-detail">Clara + Marco + Fondo</div></div>
+      <div class="kpi-card teal"><div class="kpi-label">Pendientes</div><div class="kpi-value">${formatMoney(data.kpis.pendientes)}</div><div class="kpi-detail">Por pagar</div></div>
+      <div class="kpi-card violet"><div class="kpi-label">Patrimonio</div><div class="kpi-value">${formatMoney(data.kpis.patrimonio)}</div><div class="kpi-detail">Ahorro acumulado</div></div>
+    `;
+  } else {
+    html += `
+      <div class="kpi-card blue"><div class="kpi-label">Ingresos del Mes</div><div class="kpi-value">${formatMoney(data.kpis.ingresos)}</div><div class="kpi-detail">Terapeutas + Cursos</div></div>
+      <div class="kpi-card red"><div class="kpi-label">Egresos Pagados</div><div class="kpi-value">${formatMoney(data.kpis.egresos)}</div><div class="kpi-detail">Operativos</div></div>
+      <div class="kpi-card green"><div class="kpi-label">Ganancia</div><div class="kpi-value">${formatMoney(data.kpis.ganancia)}</div><div class="kpi-detail">${data.kpis.pctGanancia}% (Meta: 7%)</div></div>
+      <div class="kpi-card amber"><div class="kpi-label">Utilidad Marco</div><div class="kpi-value">${formatMoney(data.kpis.utilidad)}</div><div class="kpi-detail">33.33%</div></div>
+      <div class="kpi-card teal"><div class="kpi-label">Pendientes</div><div class="kpi-value">${formatMoney(data.kpis.pendientes)}</div><div class="kpi-detail">Por pagar</div></div>
+      <div class="kpi-card violet"><div class="kpi-label">Fondo Emergencia</div><div class="kpi-value">${formatMoney(833333)}</div><div class="kpi-detail">33.33%</div></div>
+    `;
+  }
+  html += '</div>';
+
+  html += `<div class="balance-cruzado"><h3>⇄ Balance Cruzado NT ↔ FAMILIA</h3><div class="balance-cruzado-grid">
+    <div class="balance-item"><div class="label">Deuda FAMILIA → NT</div><div class="value">${formatMoney(data.balanceCruzado.deudaFamilia)}</div></div>
+    <div class="balance-arrow">⇄</div>
+    <div class="balance-item"><div class="label">Deuda NT → FAMILIA</div><div class="value">${formatMoney(data.balanceCruzado.deudaNT)}</div></div>
+  </div></div>`;
+
+  html += `<div class="charts-grid">
+    <div class="chart-card"><h3>📊 Gastos por Categoría</h3><div class="chart-container"><canvas id="chart-cat"></canvas></div></div>
+    <div class="chart-card"><h3>📈 ${isFam ? 'Presupuesto vs Real' : 'Distribución de Ganancia'}</h3><div class="chart-container"><canvas id="chart-pres"></canvas></div></div>
+    <div class="chart-card"><h3>📉 Subcategorías Variables</h3><div class="chart-container"><canvas id="chart-sub"></canvas></div></div>
+    <div class="chart-card"><h3>📈 Evolución Mensual</h3><div class="chart-container"><canvas id="chart-evol"></canvas></div></div>
+  </div>`;
+
+  html += `<div class="charts-grid"><div class="chart-card"><h3>💰 Saldos por Cuenta</h3>`;
+  data.saldosCuenta.forEach(c => {
+    html += `<div class="saldo-cuenta"><span class="nombre">${c.nombre}</span><span class="monto ${c.saldo >= 0 ? 'amount-positive' : 'amount-negative'}">${formatMoney(c.saldo)}</span></div>`;
+  });
+  html += `</div>
+    <div class="chart-card"><h3>📋 Últimas Transacciones</h3>
+    <table><thead><tr><th>Fecha</th><th>Concepto</th><th>Monto</th><th>Estado</th></tr></thead><tbody>`;
+  data.transacciones.slice(0, 5).forEach(t => {
+    const cls = t.tipo === 'INGRESO' ? 'amount-positive' : 'amount-negative';
+    const stCls = t.estado === 'PAGADO' ? 'pagado' : 'pendiente';
+    html += `<tr><td>${t.fecha}</td><td>${t.concepto}</td><td class="${cls}">${formatMoney(t.tipo === 'INGRESO' ? t.monto : -t.monto)}</td><td><span class="status-badge ${stCls}">${t.estado}</span></td></tr>`;
+  });
+  html += `</tbody></table></div></div>`;
+
+  container.innerHTML = html;
+  setTimeout(() => createDashboardCharts(data, isFam), 50);
+}
+
+function createDashboardCharts(data, isFam) {
+  // Categorías
+  const c1 = new Chart(document.getElementById('chart-cat'), {
+    type: 'doughnut', data: { labels: data.categorias.labels, datasets: [{ data: data.categorias.data, backgroundColor: COLORS.DONUT1, borderWidth: 0 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { padding: 12, usePointStyle: true, font: { size: 11 } } }, tooltip: { callbacks: { label: ctx => ctx.label + ': ' + formatMoney(ctx.raw) } } } }
+  });
+  window.chartInstances.push(c1);
+
+  // Presupuesto o Distribución
+  let c2;
+  if (isFam) {
+    c2 = new Chart(document.getElementById('chart-pres'), {
+      type: 'bar', data: { labels: data.presupuestoVsReal.labels, datasets: [{ label: 'Presupuesto', data: data.presupuestoVsReal.presupuesto, backgroundColor: '#94a3b8', borderRadius: 4 }, { label: 'Real', data: data.presupuestoVsReal.real, backgroundColor: '#0d9488', borderRadius: 4 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { usePointStyle: true } }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + formatMoney(ctx.raw) } } }, scales: { y: { beginAtZero: true, ticks: { callback: v => (v/1000000).toFixed(0) + 'M' } } } }
+    });
+  } else {
+    c2 = new Chart(document.getElementById('chart-pres'), {
+      type: 'doughnut', data: { labels: data.distribucion.labels, datasets: [{ data: data.distribucion.data, backgroundColor: ['#047857', '#d97706', '#4338ca'], borderWidth: 0 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { padding: 12, usePointStyle: true } }, tooltip: { callbacks: { label: ctx => ctx.label + ': ' + formatMoney(ctx.raw) } } } }
+    });
+  }
+  window.chartInstances.push(c2);
+
+  // Subcategorías
+  const c3 = new Chart(document.getElementById('chart-sub'), {
+    type: 'doughnut', data: { labels: data.subcategorias.labels, datasets: [{ data: data.subcategorias.data, backgroundColor: COLORS.DONUT2, borderWidth: 0 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { padding: 12, usePointStyle: true, font: { size: 11 } } }, tooltip: { callbacks: { label: ctx => ctx.label + ': ' + formatMoney(ctx.raw) } } } }
+  });
+  window.chartInstances.push(c3);
+
+  // Evolución
+  const c4 = new Chart(document.getElementById('chart-evol'), {
+    type: 'line', data: { labels: ['Dic', 'Ene', 'Feb'], datasets: [{ label: 'Ingresos', data: data.evolucion.ingresos, borderColor: '#047857', backgroundColor: 'rgba(4,120,87,0.1)', fill: true, tension: 0.3 }, { label: 'Egresos', data: data.evolucion.egresos, borderColor: '#dc2626', backgroundColor: 'rgba(220,38,38,0.1)', fill: true, tension: 0.3 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { usePointStyle: true } }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + formatMoney(ctx.raw) } } }, scales: { y: { beginAtZero: true, ticks: { callback: v => (v/1000000).toFixed(0) + 'M' } } } }
+  });
+  window.chartInstances.push(c4);
+}
+
+function renderTransacciones(container) {
+  const data = currentEntity === 'FAMILIA' ? dataFamilia : dataNeurotea;
+  let html = `<div class="table-card"><div class="table-header"><h3>Todas las Transacciones</h3><button class="btn-primary" onclick="showModal()">+ Nueva</button></div>
+    <div class="filters">
+      <input type="text" placeholder="🔍 Buscar...">
+      <select><option>Todos los tipos</option><option>INGRESO</option><option>EGRESO</option><option>AHORRO</option></select>
+      <select><option>Todas las categorías</option><option>GASTOS FIJOS</option><option>CUOTAS</option><option>VARIABLES</option></select>
+      <select><option>Todas las cuentas</option>${data.saldosCuenta.map(c => `<option>${c.nombre}</option>`).join('')}</select>
+      <select><option>Todos los estados</option><option>PAGADO</option><option>PENDIENTE</option></select>
+    </div>
+    <table><thead><tr><th>Fecha</th><th>Concepto</th><th>Tipo</th><th>Categoría</th><th>Monto</th><th>Cuenta</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>`;
+  data.transacciones.forEach(t => {
+    const cls = t.tipo === 'INGRESO' ? 'amount-positive' : 'amount-negative';
+    const stCls = t.estado === 'PAGADO' ? 'pagado' : 'pendiente';
+    const link = t.linkId ? ' 🔗' : '';
+    html += `<tr><td>${t.fecha}</td><td>${t.concepto}${link}</td><td>${t.tipo}</td><td>${t.categoria}</td><td class="${cls}">${formatMoney(t.tipo === 'INGRESO' ? t.monto : -t.monto)}</td><td>${t.cuenta}</td><td><span class="status-badge ${stCls}">${t.estado}</span></td><td><button class="btn-secondary" style="padding:4px 8px;font-size:12px;">✏️</button> <button class="btn-secondary" style="padding:4px 8px;font-size:12px;color:var(--negative);">🗑️</button></td></tr>`;
+  });
+  html += `</tbody></table><div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);"><span style="color:var(--text-secondary);font-size:13px;">Mostrando ${data.transacciones.length} transacciones</span><div><button class="btn-secondary">← Anterior</button> <button class="btn-secondary">Siguiente →</button></div></div></div>`;
+  container.innerHTML = html;
+}
+
+function renderGastosFijos(container) {
+  const data = currentEntity === 'FAMILIA' ? dataFamilia : dataNeurotea;
+  const hoy = 15;
+  const atrasados = data.gastosFijos.filter(g => g.dia < hoy && g.estado === 'PENDIENTE');
+  const estaSemana = data.gastosFijos.filter(g => g.dia >= hoy && g.dia <= hoy + 7 && g.estado === 'PENDIENTE');
+  const proxima = data.gastosFijos.filter(g => g.dia > hoy + 7 && g.estado === 'PENDIENTE');
+
+  let html = `<div class="vencimientos-grid">
+    <div class="vencimiento-card atrasado"><h4>🔴 Atrasados</h4>`;
+  if (atrasados.length) atrasados.forEach(g => html += `<div class="vencimiento-item"><span>Día ${g.dia} - ${g.concepto}</span><span class="amount-negative">${formatMoney(g.monto)}</span></div>`);
+  else html += `<p style="color:var(--text-secondary);font-size:13px;">Sin gastos atrasados</p>`;
+  html += `</div><div class="vencimiento-card esta-semana"><h4>🟡 Esta Semana</h4>`;
+  if (estaSemana.length) estaSemana.forEach(g => html += `<div class="vencimiento-item"><span>Día ${g.dia} - ${g.concepto}</span><span>${formatMoney(g.monto)}</span></div>`);
+  else html += `<p style="color:var(--text-secondary);font-size:13px;">Sin vencimientos</p>`;
+  html += `</div><div class="vencimiento-card proxima"><h4>🟢 Próxima Semana</h4>`;
+  if (proxima.length) proxima.forEach(g => html += `<div class="vencimiento-item"><span>Día ${g.dia} - ${g.concepto}</span><span>${formatMoney(g.monto)}</span></div>`);
+  else html += `<p style="color:var(--text-secondary);font-size:13px;">Sin vencimientos</p>`;
+  html += `</div></div>`;
+
+  html += `<div class="table-card"><div class="table-header"><h3>Todos los Gastos Fijos</h3><button class="btn-primary">+ Nuevo Gasto Fijo</button></div>
+    <table><thead><tr><th>Concepto</th><th>Categoría</th><th>Día Venc.</th><th>Cuenta</th><th>Monto Feb</th><th>Estado Feb</th><th>Acciones</th></tr></thead><tbody>`;
+  data.gastosFijos.forEach(g => {
+    const stCls = g.estado === 'PAGADO' ? 'pagado' : 'pendiente';
+    html += `<tr><td>${g.concepto}</td><td>${g.categoria}</td><td>${g.dia}</td><td>${g.cuenta}</td><td class="amount-negative">${formatMoney(g.monto)}</td><td><span class="status-badge ${stCls}">${g.estado}</span></td><td><button class="btn-secondary" style="padding:4px 8px;font-size:12px;">✏️</button></td></tr>`;
+  });
+  html += `</tbody></table></div>`;
+  container.innerHTML = html;
+}
+
+function renderPresupuesto(container) {
+  const data = currentEntity === 'FAMILIA' ? dataFamilia : dataNeurotea;
+  let html = `<div class="table-card"><div class="table-header"><h3>Presupuesto Anual 2026</h3><div><button class="btn-secondary">📥 Exportar</button> <button class="btn-primary">+ Agregar Línea</button></div></div>
+    <div class="presupuesto-table"><table><thead><tr><th>Concepto</th>${MESES.map(m => `<th>${m}</th>`).join('')}<th>Total</th></tr></thead><tbody>`;
+
+  let totIngresos = Array(12).fill(0);
+  let totEgresos = Array(12).fill(0);
+
+  html += `<tr style="background:#e0f2fe;"><td colspan="14" style="font-weight:600;color:var(--sky);">📈 INGRESOS</td></tr>`;
+  data.presupuestoAnual.filter(p => p.tipo === 'INGRESO').forEach(p => {
+    const total = p.valores.reduce((a,b) => a+b, 0);
+    p.valores.forEach((v,i) => totIngresos[i] += v);
+    html += `<tr><td>${p.concepto}</td>${p.valores.map(v => `<td><input type="text" value="${(v/1000000).toFixed(1)}M"></td>`).join('')}<td style="font-weight:600;">${formatMoney(total)}</td></tr>`;
+  });
+  html += `<tr class="subtotal"><td>TOTAL INGRESOS</td>${totIngresos.map(v => `<td>${formatMoney(v)}</td>`).join('')}<td>${formatMoney(totIngresos.reduce((a,b)=>a+b,0))}</td></tr>`;
+
+  html += `<tr style="background:#fee2e2;"><td colspan="14" style="font-weight:600;color:var(--negative);">📉 EGRESOS</td></tr>`;
+  data.presupuestoAnual.filter(p => p.tipo === 'EGRESO').forEach(p => {
+    const total = p.valores.reduce((a,b) => a+b, 0);
+    p.valores.forEach((v,i) => totEgresos[i] += v);
+    html += `<tr><td>${p.concepto}</td>${p.valores.map(v => `<td><input type="text" value="${(v/1000000).toFixed(1)}M"></td>`).join('')}<td style="font-weight:600;">${formatMoney(total)}</td></tr>`;
+  });
+  html += `<tr class="subtotal"><td>TOTAL EGRESOS</td>${totEgresos.map(v => `<td>${formatMoney(v)}</td>`).join('')}<td>${formatMoney(totEgresos.reduce((a,b)=>a+b,0))}</td></tr>`;
+
+  const balance = totIngresos.map((v,i) => v - totEgresos[i]);
+  html += `<tr class="total"><td>BALANCE</td>${balance.map(v => `<td>${formatMoney(v)}</td>`).join('')}<td>${formatMoney(balance.reduce((a,b)=>a+b,0))}</td></tr>`;
+
+  html += `</tbody></table></div></div>`;
+  container.innerHTML = html;
+}
+
+function renderReportes(container) {
+  const data = currentEntity === 'FAMILIA' ? dataFamilia : dataNeurotea;
+  const isFam = currentEntity === 'FAMILIA';
+
+  let html = `<div class="kpi-grid">
+    <div class="kpi-card blue"><div class="kpi-label">Ingresos Anuales</div><div class="kpi-value">${formatMoney(186000000)}</div><div class="kpi-detail">Proyección 2026</div></div>
+    <div class="kpi-card red"><div class="kpi-label">Egresos Anuales</div><div class="kpi-value">${formatMoney(168000000)}</div><div class="kpi-detail">Proyección 2026</div></div>
+    <div class="kpi-card green"><div class="kpi-label">Balance Anual</div><div class="kpi-value">${formatMoney(18000000)}</div><div class="kpi-detail">Superávit</div></div>
+    <div class="kpi-card amber"><div class="kpi-label">${isFam ? 'Ahorro Anual' : 'Ganancia Anual'}</div><div class="kpi-value">${formatMoney(30000000)}</div><div class="kpi-detail">Objetivo</div></div>
+  </div>`;
+
+  html += `<div class="charts-grid">
+    <div class="chart-card full"><h3>📈 Evolución Anual: Ingresos vs Egresos</h3><div class="chart-container"><canvas id="chart-anual"></canvas></div></div>
+    <div class="chart-card"><h3>📊 Distribución de Egresos Anual</h3><div class="chart-container"><canvas id="chart-dist-anual"></canvas></div></div>
+    <div class="chart-card"><h3>📈 Balance Mensual Acumulado</h3><div class="chart-container"><canvas id="chart-balance-acum"></canvas></div></div>
+  </div>`;
+
+  container.innerHTML = html;
+  setTimeout(() => createReportCharts(data, isFam), 50);
+}
+
+function createReportCharts(data, isFam) {
+  const ingresos = [17500000, 18500000, 19000000, 18500000, 18000000, 17500000, 16000000, 17000000, 18500000, 19500000, 18500000, 17500000];
+  const egresos = [14800000, 15200000, 15500000, 15000000, 14500000, 14000000, 13500000, 14000000, 15000000, 15500000, 15200000, 16000000];
+
+  const c1 = new Chart(document.getElementById('chart-anual'), {
+    type: 'bar', data: { labels: MESES, datasets: [{ label: 'Ingresos', data: ingresos, backgroundColor: '#047857', borderRadius: 4 }, { label: 'Egresos', data: egresos, backgroundColor: '#dc2626', borderRadius: 4 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + formatMoney(ctx.raw) } } }, scales: { y: { beginAtZero: true, ticks: { callback: v => (v/1000000).toFixed(0) + 'M' } } } }
+  });
+  window.chartInstances.push(c1);
+
+  const c2 = new Chart(document.getElementById('chart-dist-anual'), {
+    type: 'pie', data: { labels: data.categorias.labels, datasets: [{ data: data.categorias.data.map(v => v * 12), backgroundColor: COLORS.DONUT1, borderWidth: 0 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { usePointStyle: true } }, tooltip: { callbacks: { label: ctx => ctx.label + ': ' + formatMoney(ctx.raw) } } } }
+  });
+  window.chartInstances.push(c2);
+
+  const balanceAcum = ingresos.map((v, i) => ingresos.slice(0, i+1).reduce((a,b)=>a+b,0) - egresos.slice(0, i+1).reduce((a,b)=>a+b,0));
+  const c3 = new Chart(document.getElementById('chart-balance-acum'), {
+    type: 'line', data: { labels: MESES, datasets: [{ label: 'Balance Acumulado', data: balanceAcum, borderColor: '#4338ca', backgroundColor: 'rgba(67,56,202,0.1)', fill: true, tension: 0.3 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => formatMoney(ctx.raw) } } }, scales: { y: { ticks: { callback: v => (v/1000000).toFixed(0) + 'M' } } } }
+  });
+  window.chartInstances.push(c3);
+}
+
+function renderConfiguracion(container) {
+  const data = currentEntity === 'FAMILIA' ? dataFamilia : dataNeurotea;
+  const isFam = currentEntity === 'FAMILIA';
+
+  const cuentas = isFam ? ['ITAU Marco', 'Coop. Univ. Marco', 'ITAU Clara', 'UENO Clara', 'Tarjeta Solar', 'Tarjeta ITAU Clara', 'Tarjeta ITAU Marco', 'Gourmed', 'Efectivo'] : ['Atlas NeuroTEA', 'UENO Marco'];
+  const categorias = isFam ? ['GASTOS FIJOS', 'CUOTAS', 'OBLIGACIONES', 'SUSCRIPCIONES', 'VARIABLES', 'AHORRO'] : ['CLÍNICA', 'SUELDOS', 'TELEFONÍA', 'OBLIGACIONES', 'EVENTOS', 'VARIABLES'];
+  const subcategorias = isFam ? ['Supermercado', 'Combustible', 'Recreación', 'Salud', 'Ropa', 'Mantenimiento Auto', 'Gastos varios'] : ['Insumos', 'Reparaciones', 'Mant. Aire', 'Gastos Cursos', 'Cumples'];
+
+  let html = `<div class="charts-grid">
+    <div class="chart-card">
+      <div class="config-section"><h3>💳 Cuentas Bancarias</h3>
+        <div style="margin-bottom:12px;">${cuentas.map(c => `<span class="tag deletable">${c} ✕</span>`).join(' ')}</div>
+        <div style="display:flex;gap:8px;"><input type="text" placeholder="Nueva cuenta..." style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:6px;"><button class="btn-primary">Agregar</button></div>
       </div>
-    </aside>
-
-    <!-- Header -->
-    <header class="header">
-      <div class="header-left">
-        <h2 class="header-title" id="view-title">Dashboard</h2>
-        <span class="header-entity" id="header-entity">FAMILIA</span>
+      <div class="config-section"><h3>📁 Categorías de Egreso</h3>
+        <div style="margin-bottom:12px;">${categorias.map(c => `<span class="tag deletable">${c} ✕</span>`).join(' ')}</div>
+        <div style="display:flex;gap:8px;"><input type="text" placeholder="Nueva categoría..." style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:6px;"><button class="btn-primary">Agregar</button></div>
       </div>
-
-      <div class="header-right">
-        <div class="month-selector">
-          <span>&#128197;</span>
-          <select id="month-select">
-            <option value="1">Enero 2026</option>
-            <option value="2" selected>Febrero 2026</option>
-            <option value="3">Marzo 2026</option>
-            <option value="4">Abril 2026</option>
-            <option value="5">Mayo 2026</option>
-            <option value="6">Junio 2026</option>
-            <option value="7">Julio 2026</option>
-            <option value="8">Agosto 2026</option>
-            <option value="9">Septiembre 2026</option>
-            <option value="10">Octubre 2026</option>
-            <option value="11">Noviembre 2026</option>
-            <option value="12">Diciembre 2026</option>
-          </select>
-        </div>
-
-        <button class="btn-switch-entity" onclick="logout()">
-          <span>&#8644;</span>
-          Cambiar
-        </button>
+      <div class="config-section"><h3>📋 Subcategorías Variables</h3>
+        <div style="margin-bottom:12px;">${subcategorias.map(c => `<span class="tag deletable">${c} ✕</span>`).join(' ')}</div>
+        <div style="display:flex;gap:8px;"><input type="text" placeholder="Nueva subcategoría..." style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:6px;"><button class="btn-primary">Agregar</button></div>
       </div>
-    </header>
-
-    <!-- Content -->
-    <main class="content" id="main-content">
-      <!-- Dashboard content will be injected here -->
-    </main>
-  </div>
-
-  <!-- ============================================================
-       JAVASCRIPT
-       ============================================================ -->
-  <script>
-    // Estado de la aplicación
-    let currentEntity = null;
-    let currentView = 'dashboard';
-
-    // Paletas de colores para gráficos
-    const COLORS = {
-      DONUT1: ['#1e3a5f', '#be123c', '#d97706', '#4338ca', '#0d9488', '#7c3aed'],
-      DONUT2: ['#047857', '#b45309', '#0369a1', '#7c3aed', '#c2410c', '#0891b2', '#059669', '#4338ca', '#0d9488', '#1e3a5f']
-    };
-
-    // Datos mockup FAMILIA
-    const dataFamilia = {
-      kpis: {
-        ingresos: 18500000,
-        egresos: 15200000,
-        balance: 3300000,
-        ahorro: 2500000
-      },
-      categorias: {
-        labels: ['Gastos Fijos', 'Cuotas', 'Obligaciones', 'Suscripciones', 'Variables', 'Ahorro'],
-        data: [4500000, 3200000, 1800000, 850000, 2350000, 2500000]
-      },
-      presupuestoVsReal: {
-        labels: ['Gastos Fijos', 'Cuotas', 'Variables', 'Ahorro'],
-        presupuesto: [4800000, 3500000, 3000000, 3000000],
-        real: [4500000, 3200000, 2350000, 2500000]
-      },
-      transacciones: [
-        { fecha: '28/01/2026', concepto: 'Salario Marco', tipo: 'INGRESO', monto: 12500000, cuenta: 'ITAU Marco', estado: 'PAGADO' },
-        { fecha: '28/01/2026', concepto: 'Honorarios Clara', tipo: 'INGRESO', monto: 3000000, cuenta: 'ITAU Clara', estado: 'PAGADO' },
-        { fecha: '05/02/2026', concepto: 'Supermercado', tipo: 'EGRESO', monto: -850000, cuenta: 'ITAU Clara', estado: 'PAGADO' },
-        { fecha: '10/02/2026', concepto: 'ANDE Casa', tipo: 'EGRESO', monto: -420000, cuenta: 'ITAU Marco', estado: 'PENDIENTE' },
-        { fecha: '15/02/2026', concepto: 'Escuela Niños', tipo: 'EGRESO', monto: -1800000, cuenta: 'ITAU Marco', estado: 'PAGADO' }
-      ],
-      balanceCruzado: {
-        deudaFamilia: 2500000,
-        deudaNT: 0,
-        neto: -2500000
-      }
-    };
-
-    // Datos mockup NEUROTEA
-    const dataNeurotea = {
-      kpis: {
-        ingresos: 25000000,
-        egresos: 22500000,
-        ganancia: 2500000,
-        pctGanancia: 10
-      },
-      categorias: {
-        labels: ['Clínica', 'Sueldos', 'Telefonía', 'Obligaciones', 'Eventos', 'Variables'],
-        data: [6000000, 8500000, 450000, 2800000, 1200000, 3550000]
-      },
-      distribucion: {
-        labels: ['Utilidad Marco', 'Fondo Emergencia', 'Fondo Inversión'],
-        data: [833333, 833333, 833334]
-      },
-      transacciones: [
-        { fecha: '05/02/2026', concepto: 'Aporte Terapeutas', tipo: 'INGRESO', monto: 18000000, cuenta: 'Atlas NT', estado: 'PAGADO' },
-        { fecha: '10/02/2026', concepto: 'Cursos', tipo: 'INGRESO', monto: 7000000, cuenta: 'Atlas NT', estado: 'PAGADO' },
-        { fecha: '01/02/2026', concepto: 'Alquiler Principal', tipo: 'EGRESO', monto: -3500000, cuenta: 'Atlas NT', estado: 'PAGADO' },
-        { fecha: '05/02/2026', concepto: 'Sueldo Aracely', tipo: 'EGRESO', monto: -2500000, cuenta: 'Atlas NT', estado: 'PAGADO' },
-        { fecha: '28/02/2026', concepto: 'Salario Marco Admin', tipo: 'EGRESO', monto: -5000000, cuenta: 'Atlas NT', estado: 'PENDIENTE' }
-      ],
-      balanceCruzado: {
-        deudaFamilia: 2500000,
-        deudaNT: 0,
-        neto: 2500000
-      }
-    };
-
-    // Formatear moneda (Paraguay)
-    function formatMoney(value) {
-      const absValue = Math.abs(value);
-      const formatted = new Intl.NumberFormat('es-PY').format(absValue);
-      return (value < 0 ? '-' : '') + 'Gs. ' + formatted;
-    }
-
-    // Entrar a la aplicación
-    function enterApp(entity) {
-      currentEntity = entity;
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('main-app').style.display = 'block';
-
-      // Actualizar header
-      const entityBadge = document.getElementById('header-entity');
-      entityBadge.textContent = entity;
-      entityBadge.className = 'header-entity' + (entity === 'NEUROTEA' ? ' neurotea' : '');
-
-      // Mostrar dashboard
-      showView('dashboard');
-    }
-
-    // Cerrar sesión / Cambiar entidad
-    function logout() {
-      currentEntity = null;
-      document.getElementById('main-app').style.display = 'none';
-      document.getElementById('login-screen').style.display = 'flex';
-
-      // Destruir gráficos
-      if (window.chartInstances) {
-        window.chartInstances.forEach(chart => chart.destroy());
-        window.chartInstances = [];
-      }
-    }
-
-    // Mostrar vista
-    function showView(view) {
-      currentView = view;
-
-      // Actualizar menú activo
-      document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
-      event.target.closest('a')?.classList.add('active');
-
-      // Actualizar título
-      const titles = {
-        'dashboard': 'Dashboard',
-        'transacciones': 'Transacciones',
-        'gastos-fijos': 'Gastos Fijos',
-        'presupuesto': 'Presupuesto',
-        'reportes': 'Reportes',
-        'configuracion': 'Configuración'
-      };
-      document.getElementById('view-title').textContent = titles[view] || 'Dashboard';
-
-      // Renderizar contenido
-      const content = document.getElementById('main-content');
-
-      if (view === 'dashboard') {
-        renderDashboard(content);
-      } else if (view === 'transacciones') {
-        renderTransacciones(content);
-      } else {
-        content.innerHTML = `
-          <div class="chart-card" style="text-align: center; padding: 60px;">
-            <h3 style="margin-bottom: 16px;">Vista: ${titles[view]}</h3>
-            <p style="color: var(--text-secondary);">Esta vista se implementará próximamente.</p>
-          </div>
-        `;
-      }
-    }
-
-    // Renderizar Dashboard
-    function renderDashboard(container) {
-      const data = currentEntity === 'FAMILIA' ? dataFamilia : dataNeurotea;
-      const isFamilia = currentEntity === 'FAMILIA';
-
-      // Destruir gráficos anteriores
-      if (window.chartInstances) {
-        window.chartInstances.forEach(chart => chart.destroy());
-      }
-      window.chartInstances = [];
-
-      let html = '';
-
-      // KPIs
-      if (isFamilia) {
-        html += `
-          <div class="kpi-grid">
-            <div class="kpi-card blue">
-              <div class="kpi-label">Ingresos del Mes</div>
-              <div class="kpi-value">${formatMoney(data.kpis.ingresos)}</div>
-              <div class="kpi-detail">Total recibido</div>
-            </div>
-            <div class="kpi-card red">
-              <div class="kpi-label">Egresos del Mes</div>
-              <div class="kpi-value">${formatMoney(data.kpis.egresos)}</div>
-              <div class="kpi-detail">Total pagado</div>
-            </div>
-            <div class="kpi-card amber">
-              <div class="kpi-label">Balance</div>
-              <div class="kpi-value">${formatMoney(data.kpis.balance)}</div>
-              <div class="kpi-detail">Ingresos - Egresos</div>
-            </div>
-            <div class="kpi-card green">
-              <div class="kpi-label">Ahorro del Mes</div>
-              <div class="kpi-value">${formatMoney(data.kpis.ahorro)}</div>
-              <div class="kpi-detail">Clara + Marco + Fondo</div>
-            </div>
-          </div>
-        `;
-      } else {
-        html += `
-          <div class="kpi-grid">
-            <div class="kpi-card blue">
-              <div class="kpi-label">Ingresos del Mes</div>
-              <div class="kpi-value">${formatMoney(data.kpis.ingresos)}</div>
-              <div class="kpi-detail">Terapeutas + Cursos</div>
-            </div>
-            <div class="kpi-card red">
-              <div class="kpi-label">Egresos del Mes</div>
-              <div class="kpi-value">${formatMoney(data.kpis.egresos)}</div>
-              <div class="kpi-detail">Gastos operativos</div>
-            </div>
-            <div class="kpi-card green">
-              <div class="kpi-label">Ganancia</div>
-              <div class="kpi-value">${formatMoney(data.kpis.ganancia)}</div>
-              <div class="kpi-detail">${data.kpis.pctGanancia}% (Meta: 7%)</div>
-            </div>
-            <div class="kpi-card amber">
-              <div class="kpi-label">Utilidad Marco</div>
-              <div class="kpi-value">${formatMoney(data.distribucion.data[0])}</div>
-              <div class="kpi-detail">33.33% de ganancia</div>
-            </div>
-          </div>
-        `;
-      }
-
-      // Balance Cruzado
-      html += `
-        <div class="balance-cruzado">
-          <h3>&#8644; Balance Cruzado NT &#8596; FAMILIA</h3>
-          <div class="balance-cruzado-grid">
-            <div class="balance-item">
-              <div class="label">Deuda FAMILIA a NT</div>
-              <div class="value">${formatMoney(data.balanceCruzado.deudaFamilia)}</div>
-            </div>
-            <div class="balance-arrow">&#8596;</div>
-            <div class="balance-item">
-              <div class="label">Deuda NT a FAMILIA</div>
-              <div class="value">${formatMoney(data.balanceCruzado.deudaNT)}</div>
-            </div>
-          </div>
+    </div>
+    <div class="chart-card">
+      ${!isFam ? `<div class="config-section"><h3>🎯 Metas NeuroTEA</h3>
+        <div class="config-item"><span>Meta Ganancia Mínima</span><input type="number" value="7" style="width:80px;padding:6px;border:1px solid var(--border);border-radius:4px;"> %</div>
+        <div class="config-item"><span>Meta Máximo Gastos</span><input type="number" value="93" style="width:80px;padding:6px;border:1px solid var(--border);border-radius:4px;"> %</div>
+        <div class="config-item"><span>Distribución Utilidad</span><input type="number" value="33.33" style="width:80px;padding:6px;border:1px solid var(--border);border-radius:4px;"> %</div>
+      </div>` : ''}
+      <div class="config-section"><h3>💾 Importar / Exportar</h3>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <button class="btn-primary" style="justify-content:center;">📤 Exportar Backup (JSON)</button>
+          <button class="btn-secondary" style="justify-content:center;">📥 Importar Backup (JSON)</button>
+          <button class="btn-secondary" style="justify-content:center;">📥 Importar Transacciones (CSV)</button>
         </div>
-      `;
+      </div>
+      <div class="config-section"><h3>💰 Saldos Iniciales por Cuenta</h3>
+        ${data.saldosCuenta.map(c => `<div class="config-item"><span>${c.nombre}</span><input type="text" value="${formatMoney(c.saldo).replace('Gs. ', '')}" style="width:120px;padding:6px;border:1px solid var(--border);border-radius:4px;text-align:right;"></div>`).join('')}
+      </div>
+    </div>
+  </div>`;
 
-      // Gráficos
-      html += `
-        <div class="charts-grid">
-          <div class="chart-card">
-            <h3>Gastos por Categoría</h3>
-            <div class="chart-container">
-              <canvas id="chart-categorias"></canvas>
-            </div>
-          </div>
-          <div class="chart-card">
-            <h3>${isFamilia ? 'Presupuesto vs Real' : 'Distribución de Ganancia'}</h3>
-            <div class="chart-container">
-              <canvas id="chart-secondary"></canvas>
-            </div>
-          </div>
-        </div>
-      `;
+  container.innerHTML = html;
+}
 
-      // Últimas transacciones
-      html += `
-        <div class="table-card">
-          <div class="table-header">
-            <h3>Últimas Transacciones</h3>
-            <button class="btn-primary" onclick="showView('transacciones')">
-              <span>+</span> Nueva
-            </button>
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Concepto</th>
-                <th>Tipo</th>
-                <th>Monto</th>
-                <th>Cuenta</th>
-                <th>Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-      `;
+function showModal() {
+  const data = currentEntity === 'FAMILIA' ? dataFamilia : dataNeurotea;
+  const cuentas = data.saldosCuenta.map(c => c.nombre);
+  const categorias = currentEntity === 'FAMILIA' ? ['GASTOS FIJOS', 'CUOTAS', 'OBLIGACIONES', 'SUSCRIPCIONES', 'VARIABLES'] : ['CLÍNICA', 'SUELDOS', 'TELEFONÍA', 'OBLIGACIONES', 'EVENTOS', 'VARIABLES'];
 
-      data.transacciones.forEach(t => {
-        const amountClass = t.tipo === 'INGRESO' ? 'amount-positive' : 'amount-negative';
-        const statusClass = t.estado === 'PAGADO' ? 'pagado' : 'pendiente';
-        html += `
-          <tr>
-            <td>${t.fecha}</td>
-            <td>${t.concepto}</td>
-            <td>${t.tipo}</td>
-            <td class="${amountClass}">${formatMoney(t.monto)}</td>
-            <td>${t.cuenta}</td>
-            <td><span class="status-badge ${statusClass}">${t.estado}</span></td>
-          </tr>
-        `;
-      });
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `<div class="modal">
+    <h2>Nueva Transacción</h2>
+    <div class="form-grid">
+      <div class="form-group"><label>Fecha</label><input type="date" value="2026-02-15"></div>
+      <div class="form-group"><label>Tipo</label><select id="tipo-select" onchange="onTipoChange()"><option>INGRESO</option><option>EGRESO</option>${currentEntity === 'FAMILIA' ? '<option>AHORRO</option>' : ''}</select></div>
+      <div class="form-group"><label>Concepto</label><input type="text" placeholder="Ej: Supermercado"></div>
+      <div class="form-group"><label>Monto (Gs.)</label><input type="text" placeholder="1.500.000"></div>
+      <div class="form-group"><label>Categoría</label><select id="cat-select" disabled><option>-</option>${categorias.map(c => `<option>${c}</option>`).join('')}</select></div>
+      <div class="form-group"><label>Subcategoría</label><select id="subcat-select" disabled><option>-</option></select></div>
+      <div class="form-group"><label>Cuenta</label><select>${cuentas.map(c => `<option>${c}</option>`).join('')}</select></div>
+      <div class="form-group"><label>Estado</label><select><option>PAGADO</option><option>PENDIENTE</option></select></div>
+    </div>
+    <div class="form-group"><label>Notas</label><textarea placeholder="Notas adicionales..."></textarea></div>
+    <div class="form-actions"><button class="btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancelar</button><button class="btn-primary">Guardar</button></div>
+  </div>`;
+  document.body.appendChild(modal);
+  modal.onclick = e => { if (e.target === modal) modal.remove(); };
+}
 
-      html += `
-            </tbody>
-          </table>
-        </div>
-      `;
-
-      container.innerHTML = html;
-
-      // Crear gráficos después de insertar el HTML
-      setTimeout(() => {
-        createCharts(data, isFamilia);
-      }, 100);
-    }
-
-    // Crear gráficos
-    function createCharts(data, isFamilia) {
-      // Gráfico de categorías (Donut)
-      const ctxCat = document.getElementById('chart-categorias');
-      if (ctxCat) {
-        const chartCat = new Chart(ctxCat, {
-          type: 'doughnut',
-          data: {
-            labels: data.categorias.labels,
-            datasets: [{
-              data: data.categorias.data,
-              backgroundColor: COLORS.DONUT1,
-              borderWidth: 0
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: 'right',
-                labels: {
-                  padding: 15,
-                  usePointStyle: true,
-                  font: { size: 12 }
-                }
-              },
-              tooltip: {
-                callbacks: {
-                  label: function(context) {
-                    return context.label + ': ' + formatMoney(context.raw);
-                  }
-                }
-              }
-            }
-          }
-        });
-        window.chartInstances.push(chartCat);
-      }
-
-      // Gráfico secundario
-      const ctxSec = document.getElementById('chart-secondary');
-      if (ctxSec) {
-        let chartSec;
-        if (isFamilia) {
-          // Presupuesto vs Real (barras)
-          chartSec = new Chart(ctxSec, {
-            type: 'bar',
-            data: {
-              labels: data.presupuestoVsReal.labels,
-              datasets: [
-                {
-                  label: 'Presupuesto',
-                  data: data.presupuestoVsReal.presupuesto,
-                  backgroundColor: '#94a3b8',
-                  borderRadius: 4
-                },
-                {
-                  label: 'Real',
-                  data: data.presupuestoVsReal.real,
-                  backgroundColor: '#0d9488',
-                  borderRadius: 4
-                }
-              ]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  position: 'top',
-                  labels: { usePointStyle: true }
-                },
-                tooltip: {
-                  callbacks: {
-                    label: function(context) {
-                      return context.dataset.label + ': ' + formatMoney(context.raw);
-                    }
-                  }
-                }
-              },
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  ticks: {
-                    callback: function(value) {
-                      return (value / 1000000).toFixed(1) + 'M';
-                    }
-                  }
-                }
-              }
-            }
-          });
-        } else {
-          // Distribución de ganancia (donut)
-          chartSec = new Chart(ctxSec, {
-            type: 'doughnut',
-            data: {
-              labels: data.distribucion.labels,
-              datasets: [{
-                data: data.distribucion.data,
-                backgroundColor: ['#047857', '#d97706', '#4338ca'],
-                borderWidth: 0
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  position: 'right',
-                  labels: {
-                    padding: 15,
-                    usePointStyle: true
-                  }
-                },
-                tooltip: {
-                  callbacks: {
-                    label: function(context) {
-                      return context.label + ': ' + formatMoney(context.raw);
-                    }
-                  }
-                }
-              }
-            }
-          });
-        }
-        window.chartInstances.push(chartSec);
-      }
-    }
-
-    // Renderizar vista de Transacciones
-    function renderTransacciones(container) {
-      const data = currentEntity === 'FAMILIA' ? dataFamilia : dataNeurotea;
-
-      let html = `
-        <div class="table-card">
-          <div class="table-header">
-            <h3>Todas las Transacciones</h3>
-            <button class="btn-primary">
-              <span>+</span> Nueva Transacción
-            </button>
-          </div>
-
-          <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
-            <input type="text" placeholder="Buscar..." style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; width: 200px;">
-            <select style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px;">
-              <option>Todas las categorías</option>
-              <option>Gastos Fijos</option>
-              <option>Variables</option>
-              <option>Cuotas</option>
-            </select>
-            <select style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px;">
-              <option>Todas las cuentas</option>
-              <option>ITAU Marco</option>
-              <option>ITAU Clara</option>
-            </select>
-            <select style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px;">
-              <option>Todos los estados</option>
-              <option>Pagado</option>
-              <option>Pendiente</option>
-            </select>
-          </div>
-
-          <table>
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Concepto</th>
-                <th>Tipo</th>
-                <th>Categoría</th>
-                <th>Monto</th>
-                <th>Cuenta</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-      `;
-
-      data.transacciones.forEach(t => {
-        const amountClass = t.tipo === 'INGRESO' ? 'amount-positive' : 'amount-negative';
-        const statusClass = t.estado === 'PAGADO' ? 'pagado' : 'pendiente';
-        html += `
-          <tr>
-            <td>${t.fecha}</td>
-            <td>${t.concepto}</td>
-            <td>${t.tipo}</td>
-            <td>-</td>
-            <td class="${amountClass}">${formatMoney(t.monto)}</td>
-            <td>${t.cuenta}</td>
-            <td><span class="status-badge ${statusClass}">${t.estado}</span></td>
-            <td>
-              <button style="background: none; border: none; cursor: pointer; padding: 4px 8px;">&#9998;</button>
-              <button style="background: none; border: none; cursor: pointer; padding: 4px 8px; color: var(--negative);">&#128465;</button>
-            </td>
-          </tr>
-        `;
-      });
-
-      html += `
-            </tbody>
-          </table>
-
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);">
-            <span style="color: var(--text-secondary); font-size: 14px;">Mostrando 5 de 5 transacciones</span>
-            <div style="display: flex; gap: 8px;">
-              <button style="padding: 6px 12px; border: 1px solid var(--border); border-radius: 4px; background: white; cursor: pointer;">Anterior</button>
-              <button style="padding: 6px 12px; border: 1px solid var(--border); border-radius: 4px; background: white; cursor: pointer;">Siguiente</button>
-            </div>
-          </div>
-        </div>
-      `;
-
-      container.innerHTML = html;
-    }
-
-    // Inicialización
-    window.chartInstances = [];
-  </script>
+function onTipoChange() {
+  const tipo = document.getElementById('tipo-select').value;
+  const cat = document.getElementById('cat-select');
+  const subcat = document.getElementById('subcat-select');
+  if (tipo === 'INGRESO') { cat.disabled = true; cat.value = '-'; subcat.disabled = true; }
+  else { cat.disabled = false; }
+}
+</script>
 </body>
 </html>
